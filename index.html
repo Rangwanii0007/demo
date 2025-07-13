@@ -476,6 +476,7 @@
 
         <!-- Main Content Area -->
         <main id="main-content" class="w-full max-w-4xl px-4 z-10">
+            <div id="loading-message" class="text-center text-blue-400 text-xl font-semibold mt-10">Loading application...</div>
             <!-- Page content will be rendered here by JavaScript -->
         </main>
 
@@ -1545,6 +1546,9 @@
         function renderAuthPage() {
             const mainContent = document.getElementById('main-content');
             document.getElementById('app-header').classList.add('hidden'); // Hide header on auth page
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 text-gray-100 max-w-md w-full mx-auto">
@@ -1623,6 +1627,9 @@
         function renderDashboardPage() {
             const mainContent = document.getElementById('main-content');
             document.getElementById('app-header').classList.remove('hidden'); // Show header on dashboard
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700 text-gray-100">
@@ -1736,6 +1743,9 @@
             const mainContent = document.getElementById('main-content');
             // Create a shuffled copy of adImageUrls for this render session
             const shuffledAdImageUrls = shuffleArray([...adImageUrls]);
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100">
@@ -1785,6 +1795,9 @@
         function renderSpinRollPage() {
             const mainContent = document.getElementById('main-content');
             const spinTimeLeft = calculateTimeLeft(spinCooldownEndTime);
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             // Define segments for the spin wheel (values from $0.50 to $20.00)
             const segments = spinSegments; // Use the updated global spinSegments
@@ -1867,6 +1880,9 @@
         function renderTasksPage() {
             const mainContent = document.getElementById('main-content');
             const taskTimeLeft = calculateTimeLeft(taskCooldownEndTime);
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100">
@@ -1920,6 +1936,9 @@
         function renderReferralPage() {
             const mainContent = document.getElementById('main-content');
             const referralLink = `${BASE_APP_URL}?ref=${referralCode}`; // Construct the full referral link
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100">
@@ -1999,6 +2018,9 @@
         function renderWithdrawalPage() {
             const mainContent = document.getElementById('main-content');
             const autoWithdrawalTimeLeft = calculateTimeLeft(lastAutomaticWithdrawalTime + AUTO_WITHDRAWAL_COOLDOWN_MS);
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
 
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100">
@@ -2148,6 +2170,10 @@
 
         function renderPrivacyPage() {
             const mainContent = document.getElementById('main-content');
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
+
             mainContent.innerHTML = `
                 <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100">
                     <h2 class="text-3xl font-extrabold text-gray-100 mb-6 text-center font-heading">Ad Privacy Policy</h2>
