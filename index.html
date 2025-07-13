@@ -2203,6 +2203,12 @@
         }
 
         function renderPage(page) {
+            console.log(`Attempting to render page: ${page}`);
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.classList.add('hidden'); // Hide loading message as soon as renderPage is called
+            }
+
             currentPage = page;
             const navButtons = document.querySelectorAll('header nav button');
             navButtons.forEach(button => {
@@ -2259,6 +2265,7 @@
             }
             updateBalanceDisplay(); // Always update display after rendering page
             updateCooldownDisplay(); // Always update cooldown display
+            console.log(`Page ${page} rendered.`);
         }
 
         // --- Background Canvas Animation Logic ---
@@ -2274,6 +2281,7 @@
             window.addEventListener('resize', resizeCanvas);
             createParticles();
             animateParticles();
+            console.log("Background canvas initialized.");
         }
 
         function resizeCanvas() {
@@ -2354,6 +2362,7 @@
 
             window.addEventListener('resize', onCoinRainWindowResize);
             animateCoinRain();
+            console.log("Coin rain canvas initialized.");
         }
 
         function onCoinRainWindowResize() {
@@ -2565,9 +2574,10 @@
                 console.log("Firebase initialized successfully.");
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
-                showAlert("Initialization Error", "Failed to connect to Firebase. Please check your console for details.", "error");
-                // Prevent further execution if Firebase fails to initialize
-                return;
+                showAlert("Initialization Error", `Failed to connect to Firebase. Error: ${error.message}. Please check your console for details.`, "error");
+                // Attempt to render auth page even if Firebase init fails, so user isn't stuck on "Loading..."
+                renderPage('auth');
+                return; // Stop further execution if Firebase fails to initialize
             }
 
             // Initial authentication check using __initial_auth_token
@@ -2596,85 +2606,90 @@
             // Set up Auth state listener (this will now react to the initial sign-in above)
             onAuthStateChanged(auth, async (user) => {
                 console.log("Auth state changed. User:", user ? user.uid : "null");
-                if (user) {
-                    userId = user.uid;
-                    // Listen for real-time updates to user data
-                    const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
-                    onSnapshot(userDocRef, (docSnap) => {
-                        console.log("User data snapshot received.");
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            console.log("User data:", data);
-                            // Only update balance if it's different to trigger animation
-                            if (balance !== data.balance) {
-                                displayedBalance = balance; // Set starting point for animation
-                                balance = data.balance || 0;
-                            } else {
-                                balance = data.balance || 0;
-                                displayedBalance = balance; // If no change, keep displayed and actual in sync
-                            }
+                try {
+                    if (user) {
+                        userId = user.uid;
+                        // Listen for real-time updates to user data
+                        const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
+                        onSnapshot(userDocRef, (docSnap) => {
+                            console.log("User data snapshot received.");
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                console.log("User data:", data);
+                                // Only update balance if it's different to trigger animation
+                                if (balance !== data.balance) {
+                                    displayedBalance = balance; // Set starting point for animation
+                                    balance = data.balance || 0;
+                                } else {
+                                    balance = data.balance || 0;
+                                    displayedBalance = balance; // If no change, keep displayed and actual in sync
+                                }
 
-                            adsWatched = data.adsWatched || 0;
-                            cooldownEndTime = data.cooldownEndTime || 0;
-                            spinCooldownEndTime = data.spinCooldownEndTime || 0;
-                            tasksCompleted = data.tasksCompleted || 0;
-                            taskCooldownEndTime = data.taskCooldownEndTime || 0;
-                            referralCode = data.referralCode || '';
-                            totalReferrals = data.totalReferrals || 0;
-                            referralEarnings = data.referralEarnings || 0;
-                            unclaimedReferralBalance = data.unclaimedReferralBalance || 0; // Load unclaimed balance
-                            savedWithdrawalMethod = data.withdrawalMethod || null; // Load saved method
-                            savedWithdrawalAddress = data.withdrawalAddress || null; // Load saved address
-                            lastAutomaticWithdrawalTime = data.lastAutomaticWithdrawalTime || 0; // Load last auto withdrawal time
-                            
-                            isAuthReady = true; // Data loaded
-                            renderPage('dashboard'); // Render dashboard after data is loaded
-                            checkAndProcessAutomaticWithdrawal(); // Check for auto withdrawal
-                        } else {
-                            // User exists but no profile data (e.g., new anonymous user or new email/password user)
-                            // This case is handled in createAccount/loginAsGuest now, so it should create a profile.
-                            // If it still happens here, it means something went wrong with initial profile creation.
-                            console.warn("User profile not found for existing user:", userId, "Attempting to create default profile.");
-                            const newReferralCode = generateReferralCode(userId);
-                            createOrUpdateUserProfile(userId, {
-                                balance: 0,
-                                adsWatched: 0,
-                                cooldownEndTime: 0,
-                                spinCooldownEndTime: 0,
-                                tasksCompleted: 0,
-                                taskCooldownEndTime: 0,
-                                referralCode: newReferralCode,
-                                totalReferrals: 0,
-                                referralEarnings: 0,
-                                unclaimedReferralBalance: 0, // Initialize
-                                referredBy: null,
-                                withdrawalMethod: null, // Initialize
-                                withdrawalAddress: null, // Initialize
-                                lastAutomaticWithdrawalTime: 0, // Initialize
-                                createdAt: Date.now()
-                            }).then(() => {
-                                isAuthReady = true;
-                                renderPage('dashboard');
-                                console.log("Default profile created and dashboard rendered.");
-                            }).catch(error => {
-                                console.error("Error creating default profile for existing user:", error);
-                                showAlert("Error", "Failed to initialize user profile.", "error");
-                                isAuthReady = true;
-                                renderPage('auth');
-                            });
-                        }
-                    }, (error) => {
-                        console.error("Error listening to user data:", error);
-                        showAlert("Data Sync Error", "Failed to load user data in real-time.", "error");
-                        isAuthReady = true; // Still mark as ready
-                        renderPage('auth'); // Fallback to auth
-                    });
-                } else {
-                    // No user is signed in.
-                    userId = null;
-                    isAuthReady = true; // Auth state checked
-                    renderPage('auth');
-                    console.log("No user signed in, rendering auth page.");
+                                adsWatched = data.adsWatched || 0;
+                                cooldownEndTime = data.cooldownEndTime || 0;
+                                spinCooldownEndTime = data.spinCooldownEndTime || 0;
+                                tasksCompleted = data.tasksCompleted || 0;
+                                taskCooldownEndTime = data.taskCooldownEndTime || 0;
+                                referralCode = data.referralCode || '';
+                                totalReferrals = data.totalReferrals || 0;
+                                referralEarnings = data.referralEarnings || 0;
+                                unclaimedReferralBalance = data.unclaimedReferralBalance || 0; // Load unclaimed balance
+                                savedWithdrawalMethod = data.withdrawalMethod || null; // Load saved method
+                                savedWithdrawalAddress = data.withdrawalAddress || null; // Load saved address
+                                lastAutomaticWithdrawalTime = data.lastAutomaticWithdrawalTime || 0; // Load last auto withdrawal time
+                                
+                                isAuthReady = true; // Data loaded
+                                renderPage('dashboard'); // Render dashboard after data is loaded
+                                checkAndProcessAutomaticWithdrawal(); // Check for auto withdrawal
+                            } else {
+                                // User exists but no profile data (e.g., new anonymous user or new email/password user)
+                                console.warn("User profile not found for existing user:", userId, "Attempting to create default profile.");
+                                const newReferralCode = generateReferralCode(userId);
+                                createOrUpdateUserProfile(userId, {
+                                    balance: 0,
+                                    adsWatched: 0,
+                                    cooldownEndTime: 0,
+                                    spinCooldownEndTime: 0,
+                                    tasksCompleted: 0,
+                                    taskCooldownEndTime: 0,
+                                    referralCode: newReferralCode,
+                                    totalReferrals: 0,
+                                    referralEarnings: 0,
+                                    unclaimedReferralBalance: 0, // Initialize
+                                    referredBy: null,
+                                    withdrawalMethod: null, // Initialize
+                                    withdrawalAddress: null, // Initialize
+                                    lastAutomaticWithdrawalTime: 0, // Initialize
+                                    createdAt: Date.now()
+                                }).then(() => {
+                                    isAuthReady = true;
+                                    renderPage('dashboard');
+                                    console.log("Default profile created and dashboard rendered.");
+                                }).catch(error => {
+                                    console.error("Error creating default profile for existing user:", error);
+                                    showAlert("Error", `Failed to initialize user profile. Error: ${error.message}`, "error");
+                                    isAuthReady = true;
+                                    renderPage('auth');
+                                });
+                            }
+                        }, (error) => {
+                            console.error("Error listening to user data:", error);
+                            showAlert("Data Sync Error", `Failed to load user data in real-time. Error: ${error.message}`, "error");
+                            isAuthReady = true; // Still mark as ready
+                            renderPage('auth'); // Fallback to auth
+                        });
+                    } else {
+                        // No user is signed in.
+                        userId = null;
+                        isAuthReady = true; // Auth state checked
+                        renderPage('auth');
+                        console.log("No user signed in, rendering auth page.");
+                    }
+                } catch (authError) {
+                    console.error("Error in onAuthStateChanged callback:", authError);
+                    showAlert("Authentication Error", `An error occurred during authentication. Error: ${authError.message}`, "error");
+                    isAuthReady = true;
+                    renderPage('auth'); // Ensure auth page is rendered even on auth listener error
                 }
             });
 
