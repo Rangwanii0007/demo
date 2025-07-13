@@ -2327,6 +2327,7 @@
         const coinMaterialUSD = new THREE.MeshLambertMaterial({ color: 0xFFD700 }); // Gold color for USD
         const coinMaterialUSDT = new THREE.MeshLambertMaterial({ color: 0xADD8E6 }); // LightBlue for USDT
         const coinMaterialXRP = new THREE.MeshLambertMaterial({ color: 0x8A2BE2 }); // BlueViolet for XRP
+        const coinMaterialDefault = new THREE.MeshLambertMaterial({ color: 0xC0C0C0 }); // Default silver for others
 
         // Define gravity and bounce factor globally
         const gravity = -0.05; // Downward acceleration
@@ -2377,7 +2378,7 @@
                     break;
                 // Add more cases for other cryptocurrencies if needed
                 default:
-                    material = coinMaterialUSD; // Default to gold
+                    material = coinMaterialDefault; // Default to silver for unspecified
             }
             const coin = new THREE.Mesh(coinGeometry, material);
             // Increased scale for larger coins: 1.2 to 2.0 times the base geometry
@@ -2522,33 +2523,68 @@
 
         // --- Initialize App ---
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log("DOM Content Loaded. Starting app initialization.");
             // Initialize Firebase with your specific details
             // Use global __firebase_config if available, otherwise use placeholders
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "YOUR_API_KEY", // Replace with your actual Firebase API Key
-                authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Firebase Auth Domain
-                projectId: "YOUR_PROJECT_ID", // Replace with your actual Firebase Project ID
-                storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Firebase Storage Bucket
-                messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Firebase Messaging Sender ID
-                appId: "YOUR_APP_ID", // Replace with your actual Firebase App ID
-                measurementId: "YOUR_MEASUREMENT_ID" // Replace with your actual Firebase Measurement ID
-            };
-            
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
+            let firebaseConfig;
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                    console.log("Firebase config loaded from __firebase_config.");
+                } catch (e) {
+                    console.error("Error parsing __firebase_config:", e);
+                    // Fallback to placeholder if parsing fails
+                    firebaseConfig = {
+                        apiKey: "YOUR_API_KEY", // Replace with your actual Firebase API Key
+                        authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Firebase Auth Domain
+                        projectId: "YOUR_PROJECT_ID", // Replace with your actual Firebase Project ID
+                        storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Firebase Storage Bucket
+                        messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Firebase Messaging Sender ID
+                        appId: "YOUR_APP_ID", // Replace with your actual Firebase App ID
+                        measurementId: "YOUR_MEASUREMENT_ID" // Replace with your actual Firebase Measurement ID
+                    };
+                    console.warn("Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
+                }
+            } else {
+                firebaseConfig = {
+                    apiKey: "YOUR_API_KEY", // Replace with your actual Firebase API Key
+                    authDomain: "YOUR_AUTH_DOMAIN", // Replace with your actual Firebase Auth Domain
+                    projectId: "YOUR_PROJECT_ID", // Replace with your actual Firebase Project ID
+                    storageBucket: "YOUR_STORAGE_BUCKET", // Replace with your actual Firebase Storage Bucket
+                    messagingSenderId: "YOUR_MESSAGING_SENDER_ID", // Replace with your actual Firebase Messaging Sender ID
+                    appId: "YOUR_APP_ID", // Replace with your actual Firebase App ID
+                    measurementId: "YOUR_MEASUREMENT_ID" // Replace with your actual Firebase Measurement ID
+                };
+                console.warn("No __firebase_config found. Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                console.log("Firebase initialized successfully.");
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showAlert("Initialization Error", "Failed to connect to Firebase. Please check your console for details.", "error");
+                // Prevent further execution if Firebase fails to initialize
+                return;
+            }
 
             // Initial authentication check using __initial_auth_token
             if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token !== null && __initial_auth_token !== '') {
                 try {
+                    console.log("Attempting sign-in with custom token.");
                     await signInWithCustomToken(auth, __initial_auth_token);
+                    console.log("Signed in with custom token.");
                 } catch (error) {
-                    console.error("Error signing in with custom token:", error);
-                    // Fallback to anonymous if custom token fails
+                    console.error("Error signing in with custom token, falling back to anonymous:", error);
                     await signInAnonymously(auth);
+                    console.log("Signed in anonymously after custom token failure.");
                 }
             } else {
+                console.log("No custom token found, signing in anonymously.");
                 await signInAnonymously(auth);
+                console.log("Signed in anonymously.");
             }
 
             initCanvas(); // Initialize background canvas animation
@@ -2559,13 +2595,16 @@
 
             // Set up Auth state listener (this will now react to the initial sign-in above)
             onAuthStateChanged(auth, async (user) => {
+                console.log("Auth state changed. User:", user ? user.uid : "null");
                 if (user) {
                     userId = user.uid;
                     // Listen for real-time updates to user data
                     const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
                     onSnapshot(userDocRef, (docSnap) => {
+                        console.log("User data snapshot received.");
                         if (docSnap.exists()) {
                             const data = docSnap.data();
+                            console.log("User data:", data);
                             // Only update balance if it's different to trigger animation
                             if (balance !== data.balance) {
                                 displayedBalance = balance; // Set starting point for animation
@@ -2616,6 +2655,7 @@
                             }).then(() => {
                                 isAuthReady = true;
                                 renderPage('dashboard');
+                                console.log("Default profile created and dashboard rendered.");
                             }).catch(error => {
                                 console.error("Error creating default profile for existing user:", error);
                                 showAlert("Error", "Failed to initialize user profile.", "error");
@@ -2634,6 +2674,7 @@
                     userId = null;
                     isAuthReady = true; // Auth state checked
                     renderPage('auth');
+                    console.log("No user signed in, rendering auth page.");
                 }
             });
 
