@@ -639,7 +639,7 @@
             "https://www.profitableratecpm.com/xp8srwyr?key=980aeacfeee7fed071afcf7c6dd452fa",
             "https://www.profitableratecpm.com/zwt2kf6q?key=e089b2fc17db3a7d71405420a0b72a2d",
             "https://www.profitableratecpm.com/picq35z4?key=dfe34626298b8704347c7852027646c8",
-            "https://www.profitableratecpm.com/uudm9x92?key=4ac673dbc7c7852027646c8",
+            "https://www.profitableratecpm.com/uudm9x92?key=4ac673dbc7b0c0fcabab7eec886b0d48",
             "https://www.profitableratecpm.com/k7cnm9n0?key=c4a438057537490d6366452641e47bd6",
             "https://www.profitableratecpm.com/v30v9iyyx?key=d7ca0b45aee9f9b8402f8dce202ab1ff",
             "https://www.profitableratecpm.com/i3gkm6gh?key=d85966e00870fe9d565af06a993c1d9e",
@@ -866,13 +866,8 @@
         // Function to generate a unique referral code embedding the UID
         function generateReferralCode(uid) {
             // Use a portion of the UID and a random string for uniqueness and traceability
-            // Example: REF-abc12345-XYZW
-            // Ensure uid is not null or undefined before calling substring
-            if (!uid) {
-                console.error("UID is null or undefined when generating referral code.");
-                return `REF-ERROR-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-            }
-            return `REF-${uid.substring(0, 8)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+            // Ensure the UID part is also consistently uppercase for matching
+            return `REF-${uid.substring(0, 8).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         }
 
         // New: Function for the referrer to claim their unclaimed referral earnings
@@ -1535,13 +1530,9 @@
             }
 
             // Update username display on System Account page
-            const usernameDisplay = document.getElementById('system-account-username-display');
-            if (usernameDisplay) {
-                usernameDisplay.textContent = username;
-            }
             const usernameInput = document.getElementById('username-input');
             if (usernameInput) {
-                usernameInput.value = username;
+                usernameInput.value = username; // Set input value
             }
             const userIdDisplay = document.getElementById('system-account-user-id');
             if (userIdDisplay) {
@@ -1555,6 +1546,10 @@
             const accountTypeDisplay = document.getElementById('system-account-type');
             if (accountTypeDisplay) {
                 accountTypeDisplay.textContent = isAnonymousUser ? 'Guest Account' : 'Email/Password Account';
+            }
+            const systemAccountReferralCode = document.getElementById('system-account-referral-code');
+            if (systemAccountReferralCode) {
+                systemAccountReferralCode.textContent = referralCode;
             }
         }
 
@@ -2814,4 +2809,192 @@
                         projectId: "adwatchrewardsapp", // Replace with your actual Firebase Project ID
                         storageBucket: "adwatchrewardsapp.firebasestorage.app", // Replace with your actual Firebase Storage Bucket
                         messagingSenderId: "782268735936", // Replace with your actual Firebase Messaging Sender ID
-                        appId: "1:782268735936:web:ea
+                        appId: "1:782268735936:web:ea82e5be5d0f44949ba825", // Replace with your actual Firebase App ID
+                        measurementId: "G-4NG2564HTK" // Replace with your actual Firebase Measurement ID
+                    };
+                    console.warn("Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
+                }
+            } else {
+                firebaseConfig = {
+                    apiKey: "AIzaSyDaAMcSZSigXawYiD7ThoB-kXMdoa9cgyY", // Replace with your actual Firebase API Key
+                    authDomain: "adwatchrewardsapp.firebaseapp.com", // Replace with your actual Firebase Auth Domain
+                    projectId: "adwatchrewardsapp", // Replace with your actual Firebase Project ID
+                    storageBucket: "adwatchrewardsapp.firebasestorage.app", // Replace with your actual Firebase Storage Bucket
+                    messagingSenderId: "782268735936", // Replace with your actual Firebase Messaging Sender ID
+                    appId: "1:782268735936:web:ea82e5be5d0f44949ba825", // Replace with your actual Firebase App ID
+                    measurementId: "G-4NG2564HTK" // Replace with your actual Firebase Measurement ID
+                };
+                console.warn("No __firebase_config found. Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
+            }
+
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                // Removed Firebase Functions initialization as it's no longer used for client-side referral
+                console.log("Firebase initialized successfully.");
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showAlert("Initialization Error", `Failed to connect to Firebase. Error: ${error.message}. Please check your console for details.`, "error");
+                // Attempt to render auth page even if Firebase init fails, so user isn't stuck on "Loading..."
+                renderPage('auth'); // This will now typically lead to a manual login/signup
+                return; // Stop further execution if Firebase fails to initialize
+            }
+
+            initCanvas(); // Initialize background canvas animation
+            initCoinRainCanvas(); // Initialize 3D coin rain canvas
+
+            // Check for referral code in URL immediately on load (for informational popup only now)
+            activeReferralCodeFromUrl = getReferralCodeFromUrl();
+
+            // Set up Auth state listener (this will now react to the initial sign-in above)
+            onAuthStateChanged(auth, async (user) => {
+                console.log("Auth state changed. User:", user ? user.uid : "null");
+                try {
+                    if (user) {
+                        userId = user.uid;
+                        isAnonymousUser = user.isAnonymous; // Set anonymous flag
+                        // Listen for real-time updates to user data
+                        const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
+                        onSnapshot(userDocRef, (docSnap) => {
+                            console.log("User data snapshot received.");
+                            if (docSnap.exists()) {
+                                const data = docSnap.data();
+                                console.log("User data:", data);
+                                // Only update balance if it's different to trigger animation
+                                if (balance !== data.balance) {
+                                    displayedBalance = balance; // Set starting point for animation
+                                    balance = data.balance || 0;
+                                } else {
+                                    balance = data.balance || 0;
+                                    displayedBalance = balance; // If no change, keep displayed and actual in sync
+                                }
+
+                                username = data.username || (user.isAnonymous ? `Guest-${userId.substring(0, 6)}` : `User-${userId.substring(0, 6)}`); // Load username, default if not set
+                                adsWatched = data.adsWatched || 0;
+                                cooldownEndTime = data.cooldownEndTime || 0;
+                                spinCooldownEndTime = data.spinCooldownEndTime || 0;
+                                tasksCompleted = data.tasksCompleted || 0;
+                                taskCooldownEndTime = data.taskCooldownEndTime || 0;
+                                referralCode = data.referralCode || '';
+                                totalReferrals = data.totalReferrals || 0;
+                                referralEarnings = data.referralEarnings || 0;
+                                unclaimedReferralBalance = data.unclaimedReferralBalance || 0; // Load unclaimed balance
+                                referredBy = data.referredBy || null; // Load referredBy status
+                                savedWithdrawalMethod = data.withdrawalMethod || null; // Load saved method
+                                savedWithdrawalAddress = data.withdrawalAddress || null; // Load saved address
+                                lastAutomaticWithdrawalTime = data.lastAutomaticWithdrawalTime || 0; // Load last auto withdrawal time
+                                
+                                isAuthReady = true; // Data loaded
+                                renderPage('dashboard'); // Render dashboard after data is loaded
+                                checkAndProcessAutomaticWithdrawal(); // Check for auto withdrawal
+                            } else {
+                                // User exists but no profile data (e.g., new anonymous user or new email/password user)
+                                console.warn("User profile not found for existing user:", userId, "Attempting to create default profile.");
+                                const newReferralCode = generateReferralCode(userId);
+                                createOrUpdateUserProfile(userId, {
+                                    username: user.isAnonymous ? `Guest-${userId.substring(0, 6)}` : `User-${userId.substring(0, 6)}`, // Default username
+                                    balance: 0,
+                                    adsWatched: 0,
+                                    cooldownEndTime: 0,
+                                    spinCooldownEndTime: 0,
+                                    tasksCompleted: 0,
+                                    taskCooldownEndTime: 0,
+                                    referralCode: newReferralCode,
+                                    totalReferrals: 0,
+                                    referralEarnings: 0,
+                                    unclaimedReferralBalance: 0, // Initialize
+                                    referredBy: null, // Initialize
+                                    withdrawalMethod: null, // Initialize
+                                    withdrawalAddress: null, // Initialize
+                                    lastAutomaticWithdrawalTime: 0, // Initialize
+                                    createdAt: Date.now()
+                                }).then(() => {
+                                    isAuthReady = true;
+                                    renderPage('dashboard');
+                                    console.log("Default profile created and dashboard rendered.");
+                                }).catch(error => {
+                                    console.error("Error creating default profile for existing user:", error);
+                                    showAlert("Error", `Failed to initialize user profile. Error: ${error.message}`, "error");
+                                    isAuthReady = true;
+                                    renderPage('auth'); // Fallback to auth
+                                });
+                            }
+                        }, (error) => {
+                            console.error("Error listening to user data:", error);
+                            showAlert("Data Sync Error", `Failed to load user data in real-time. Error: ${error.message}`, "error");
+                            isAuthReady = true; // Still mark as ready
+                            renderPage('auth'); // Fallback to auth
+                        });
+                    } else {
+                        // No user is signed in. Attempt anonymous login.
+                        userId = null;
+                        isAnonymousUser = false; // Reset anonymous flag
+                        isAuthReady = false; // Not ready until anonymous login completes
+                        console.log("No user signed in, attempting anonymous login.");
+                        await loginAsGuest(); // This will trigger onAuthStateChanged again with the anonymous user
+                    }
+                } catch (authError) {
+                    console.error("Error in onAuthStateChanged callback:", authError);
+                    showAlert("Authentication Error", `An error occurred during authentication. Error: ${authError.message}`, "error");
+                    isAuthReady = true;
+                    renderPage('auth'); // Ensure auth page is rendered even on auth listener error
+                }
+            });
+
+            // Setup navigation button listeners (these are static elements, attach once)
+            document.getElementById('nav-dashboard').addEventListener('click', () => renderPage('dashboard'));
+            document.getElementById('nav-watch-ads').addEventListener('click', () => renderPage('watch-ads'));
+            document.getElementById('nav-spin-roll').addEventListener('click', () => renderPage('spin-roll'));
+            document.getElementById('nav-tasks').addEventListener('click', () => renderPage('tasks'));
+            document.getElementById('nav-referral').addEventListener('click', () => renderPage('referral'));
+            document.getElementById('nav-referral-bonus').addEventListener('click', () => renderPage('referral-bonus'));
+            document.getElementById('nav-withdrawal').addEventListener('click', () => renderPage('withdrawal'));
+            document.getElementById('nav-system-account').addEventListener('click', () => renderPage('system-account')); // New nav button
+            document.getElementById('nav-privacy').addEventListener('click', () => renderPage('privacy'));
+            document.getElementById('nav-logout').addEventListener('click', logoutUser);
+
+            // Setup popup close buttons (these are static elements, attach once)
+            document.getElementById('close-ad-completion-popup').addEventListener('click', () => {
+                document.getElementById('ad-completion-popup').classList.add('hidden');
+            });
+            document.getElementById('close-task-completion-popup').addEventListener('click', () => {
+                document.getElementById('task-completion-popup').classList.add('hidden');
+            });
+            document.getElementById('close-withdrawal-popup').addEventListener('click', () => {
+                document.getElementById('withdrawal-confirmation-popup').classList.add('hidden');
+            });
+
+            // Referral Info Popup Button (for users coming from old links)
+            document.getElementById('close-referral-claim-popup').addEventListener('click', () => {
+                activeReferralCodeFromUrl = null; // Clear if user closes popup
+                window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
+                document.getElementById('referral-claim-popup').classList.add('hidden');
+            });
+
+
+            // Start notification generators
+            setInterval(() => {
+                notificationQueueRight.push(generateRightNotification());
+                if (document.getElementById('live-notification-right').classList.contains('hidden')) {
+                    showRightNotification();
+                }
+            }, Math.random() * (15000 - 5000) + 5000); // Generate every 5-15 seconds
+
+            setInterval(() => {
+                notificationQueueLeft.push(generateLeftNotification());
+                if (document.getElementById('live-notification-left').classList.contains('hidden')) {
+                    showLeftNotification();
+                }
+            }, Math.random() * (20000 - 10000) + 10000); // Generate every 10-20 seconds
+
+            // Update cooldown display every second if cooldown is active
+            setInterval(() => {
+                if (isAuthReady && (cooldownEndTime > Date.now() || spinCooldownEndTime > Date.now() || taskCooldownEndTime > Date.now() || (lastAutomaticWithdrawalTime + AUTO_WITHDRAWAL_COOLDOWN_MS > Date.now()))) {
+                    updateCooldownDisplay();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
