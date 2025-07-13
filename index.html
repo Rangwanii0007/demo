@@ -571,17 +571,13 @@
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, onSnapshot, increment, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // Import the `httpsCallable` function for Cloud Functions
-        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-functions.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, onSnapshot, increment, addDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 
         // Global Firebase instances
         let app;
         let db;
         let auth;
-        let functions; // Firebase Functions instance
-        let processReferralFunction; // Callable Cloud Function reference
 
         let userId = null; // Current authenticated user ID
         let isAuthReady = false; // Flag to indicate if auth state has been checked
@@ -863,36 +859,6 @@
             return `REF-${uid.substring(0, 8)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         }
 
-        // Call Cloud Function to process referral (for referrer's reward)
-        async function processReferralBonus(referrerCode, newUserId) {
-            try {
-                // Ensure the processReferralFunction is initialized
-                if (!processReferralFunction) {
-                    throw new Error("Firebase Cloud Function not initialized. Please ensure it's deployed and the app is correctly configured.");
-                }
-
-                const result = await processReferralFunction({
-                    referrerCode,
-                    newUserId
-                });
-
-                if (result.data.success) {
-                    console.log("Cloud Function success:", result.data.message);
-                    // The referrer's balance will be updated by the Cloud Function
-                    // and then synced via onSnapshot. No client-side update for referrer here.
-                    return true;
-                } else {
-                    console.error("Cloud Function error:", result.data.message);
-                    showAlert("Referral Error", `Could not process referrer reward: ${result.data.message || 'Unknown error'}`, "error");
-                    return false;
-                }
-            } catch (cfError) {
-                console.error("Error calling Cloud Function:", cfError);
-                showAlert("Referral Error", `Failed to communicate with referral server: ${cfError.message}. Please ensure the Cloud Function is deployed and configured.`, "error");
-                return false;
-            }
-        }
-
         // New: Function for the referrer to claim their unclaimed referral earnings
         async function handleClaimReferralEarnings() {
             if (!userId) {
@@ -922,7 +888,11 @@
             }
         }
 
-        // New: Handle claiming referral code by the invited friend
+        // New: Handle claiming referral code by the invited friend (CLIENT-SIDE IMPLEMENTATION)
+        // WARNING: This client-side implementation is less secure than using a Firebase Cloud Function.
+        // It is vulnerable to client-side tampering, allowing malicious users to potentially
+        // bypass referral limits or self-refer. For a production application, a Cloud Function
+        // is strongly recommended for this logic.
         async function handleClaimReferralCode() {
             if (!userId) {
                 showAlert("Authentication Required", "Please log in to claim your bonus.", "error");
@@ -953,27 +923,57 @@
                 return;
             }
 
-            // Call the Cloud Function to process the referral
             const newFriendBonus = 5.00; // Fixed bonus for the new user
-            const success = await processReferralBonus(enteredCode, userId);
+            const referrerRewardAmount = 20.00; // Fixed reward for the referrer
 
-            if (success) {
-                try {
-                    // Apply the $5 bonus to the current user's balance
-                    await updateUserData(userId, {
-                        balance: increment(parseFloat(newFriendBonus.toFixed(2))),
-                        referredBy: enteredCode // Mark this user as referred by this code
-                    });
-                    showAlert("Bonus Claimed!", `You received a $${newFriendBonus.toFixed(2)} welcome bonus!`, "success");
-                    triggerCoinRain(newFriendBonus, selectedCurrency); // Trigger coin rain for the new user's bonus
-                    renderPage('dashboard'); // Redirect to dashboard after claiming
-                } catch (error) {
-                    console.error("Error applying new user bonus:", error);
-                    showAlert("Bonus Error", "Failed to apply your bonus. Please contact support.", "error");
+            try {
+                // 1. Find the referrer's profile by their referral code
+                // Query the 'users' collection for the profile.data sub-document
+                const referrerQuery = query(collection(db, `artifacts/${appId}/users`),
+                                            where('profile.data.referralCode', '==', enteredCode));
+                const referrerSnapshot = await getDocs(referrerQuery);
+
+                if (referrerSnapshot.empty) {
+                    showAlert("Referral Error", "Referrer not found for the provided code. Please check the code.", "error");
+                    return;
                 }
-            } else {
-                // Error message already shown by processReferralBonus
-                console.log("Referral processing failed via Cloud Function.");
+
+                const referrerDoc = referrerSnapshot.docs[0];
+                const referrerId = referrerDoc.id;
+                const referrerProfileDataRef = doc(db, `artifacts/${appId}/users/${referrerId}/profile/data`);
+
+                // 2. Get the new user's profile (current user)
+                const newUserProfileRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
+                const newUserProfileSnap = await getDoc(newUserProfileRef);
+                const newUserProfileData = newUserProfileSnap.data();
+
+                // 3. Re-check if the new user has already been referred (important if data was stale)
+                if (newUserProfileData.referredBy) {
+                    showAlert("Already Referred", "You have already claimed a referral bonus or been referred.", "warning");
+                    return;
+                }
+
+                // 4. Update referrer's unclaimedReferralBalance and totalReferrals
+                // NOTE: Without a Cloud Function transaction, there's a small risk of race conditions
+                // if multiple users try to refer the same person simultaneously.
+                await updateDoc(referrerProfileDataRef, {
+                    unclaimedReferralBalance: increment(parseFloat(referrerRewardAmount.toFixed(2))),
+                    totalReferrals: increment(1)
+                });
+
+                // 5. Update new user's balance and mark as referred
+                await updateDoc(newUserProfileRef, {
+                    balance: increment(parseFloat(newFriendBonus.toFixed(2))),
+                    referredBy: enteredCode // Store the code that referred this user
+                });
+
+                showAlert("Bonus Claimed!", `You received a $${newFriendBonus.toFixed(2)} welcome bonus!`, "success");
+                triggerCoinRain(newFriendBonus, selectedCurrency); // Trigger coin rain for the new user's bonus
+                renderPage('dashboard'); // Redirect to dashboard after claiming
+
+            } catch (error) {
+                console.error("Error processing client-side referral:", error);
+                showAlert("Referral Error", `Failed to process referral: ${error.message}.`, "error");
             }
         }
 
@@ -2585,11 +2585,7 @@
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-                functions = getFunctions(app); // Initialize Firebase Functions
-                // Get a reference to the callable Cloud Function
-                // The name 'processReferral' must match the exported function name in your functions/index.js
-                processReferralFunction = httpsCallable(functions, 'processReferral');
-
+                // Removed Firebase Functions initialization as it's no longer used for client-side referral
                 console.log("Firebase initialized successfully.");
             } catch (error) {
                 console.error("Firebase initialization failed:", error);
