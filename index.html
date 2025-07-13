@@ -465,6 +465,12 @@
                         </button>
                     </li>
                     <li>
+                        <button id="nav-system-account" class="font-semibold font-heading">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Account</span>
+                        </button>
+                    </li>
+                    <li>
                         <button id="nav-privacy" class="font-semibold font-heading">
                             <i class="fas fa-shield-alt"></i>
                             <span>Ad Privacy Policy</span>
@@ -570,7 +576,7 @@
     <script type="module">
         // Firebase Imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail, signInWithCustomToken, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, onSnapshot, increment, addDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
 
@@ -581,8 +587,10 @@
 
         let userId = null; // Current authenticated user ID
         let isAuthReady = false; // Flag to indicate if auth state has been checked
+        let isAnonymousUser = false; // New: Flag to indicate if the current user is anonymous
 
         // Global state variables (now backed by Firestore)
+        let username = ''; // New: User's display name
         let balance = 0;
         let displayedBalance = 0; // For smooth counting animation
         let adsWatched = 0;
@@ -631,7 +639,7 @@
             "https://www.profitableratecpm.com/xp8srwyr?key=980aeacfeee7fed071afcf7c6dd452fa",
             "https://www.profitableratecpm.com/zwt2kf6q?key=e089b2fc17db3a7d71405420a0b72a2d",
             "https://www.profitableratecpm.com/picq35z4?key=dfe34626298b8704347c7852027646c8",
-            "https://www.profitableratecpm.com/uudm9x92?key=4ac673dbc7b0c0fcabab7eec886b0d48",
+            "https://www.profitableratecpm.com/uudm9x92?key=4ac673dbc7c7852027646c8",
             "https://www.profitableratecpm.com/k7cnm9n0?key=c4a438057537490d6366452641e47bd6",
             "https://www.profitableratecpm.com/v30v9iyyx?key=d7ca0b45aee9f9b8402f8dce202ab1ff",
             "https://www.profitableratecpm.com/i3gkm6gh?key=d85966e00870fe9d565af06a993c1d9e",
@@ -752,6 +760,7 @@
                 // Initialize user profile in Firestore
                 const newReferralCode = generateReferralCode(uid); // Generate code with UID
                 await createOrUpdateUserProfile(uid, {
+                    username: `User-${uid.substring(0, 6)}`, // Default username
                     balance: 0,
                     adsWatched: 0,
                     cooldownEndTime: 0,
@@ -787,6 +796,7 @@
                 if (!userProfile) {
                      const newReferralCode = generateReferralCode(uid); // Generate code with UID
                      await createOrUpdateUserProfile(uid, {
+                        username: `Guest-${uid.substring(0, 6)}`, // Default username for guests
                         balance: 0,
                         adsWatched: 0,
                         cooldownEndTime: 0,
@@ -805,7 +815,7 @@
                     });
                 }
                 // The onAuthStateChanged listener will handle the redirection to dashboard
-                showAlert("Guest Login", "Logged in as guest. Your progress will be saved. Redirecting to dashboard...", "info");
+                // showAlert("Guest Login", "Logged in as guest. Your progress will be saved. Redirecting to dashboard...", "info");
             } catch (error) {
                 console.error("Anonymous login error:", error);
                 showAlert("Guest Login Failed", error.message, "error");
@@ -816,7 +826,7 @@
             try {
                 await signOut(auth);
                 showAlert("Logged Out", "You have been logged out.", "info");
-                // Reset state and render auth page
+                // Reset state and render auth page (which will now auto-login as guest)
                 balance = 0;
                 displayedBalance = 0; // Reset displayed balance too
                 adsWatched = 0;
@@ -834,7 +844,8 @@
                 lastAutomaticWithdrawalTime = 0;
                 userId = null;
                 isAuthReady = false;
-                renderPage('auth');
+                isAnonymousUser = false; // Reset anonymous flag
+                // After logout, onAuthStateChanged will trigger, which will then signInAnonymously
             } catch (error) {
                 console.error("Logout error:", error);
                 showAlert("Logout Failed", error.message, "error");
@@ -856,6 +867,11 @@
         function generateReferralCode(uid) {
             // Use a portion of the UID and a random string for uniqueness and traceability
             // Example: REF-abc12345-XYZW
+            // Ensure uid is not null or undefined before calling substring
+            if (!uid) {
+                console.error("UID is null or undefined when generating referral code.");
+                return `REF-ERROR-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+            }
             return `REF-${uid.substring(0, 8)}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
         }
 
@@ -1517,6 +1533,29 @@
                     document.getElementById('claim-referral-code-button').disabled = false;
                 }
             }
+
+            // Update username display on System Account page
+            const usernameDisplay = document.getElementById('system-account-username-display');
+            if (usernameDisplay) {
+                usernameDisplay.textContent = username;
+            }
+            const usernameInput = document.getElementById('username-input');
+            if (usernameInput) {
+                usernameInput.value = username;
+            }
+            const userIdDisplay = document.getElementById('system-account-user-id');
+            if (userIdDisplay) {
+                userIdDisplay.textContent = userId;
+            }
+            const userEmailDisplay = document.getElementById('system-account-user-email');
+            if (userEmailDisplay) {
+                // auth.currentUser.email might be null for anonymous users
+                userEmailDisplay.textContent = auth.currentUser && auth.currentUser.email ? auth.currentUser.email : 'N/A (Guest User)';
+            }
+            const accountTypeDisplay = document.getElementById('system-account-type');
+            if (accountTypeDisplay) {
+                accountTypeDisplay.textContent = isAnonymousUser ? 'Guest Account' : 'Email/Password Account';
+            }
         }
 
         // Balance counting animation logic
@@ -1586,9 +1625,6 @@
                         <button type="button" id="create-account-button" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 font-heading">
                             Create Account
                         </button>
-                        <button type="button" id="guest-login-button" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 font-heading">
-                            Continue as Guest
-                        </button>
                     </form>
                     <div class="text-center mt-4">
                         <a href="#" id="forgot-password-link" class="text-blue-400 hover:text-blue-300 text-sm font-semibold font-heading transition duration-300">Forgot Password?</a>
@@ -1607,7 +1643,6 @@
                 const password = document.getElementById('auth-password').value;
                 createAccount(email, password);
             });
-            document.getElementById('guest-login-button').addEventListener('click', loginAsGuest);
             document.getElementById('forgot-password-link').addEventListener('click', (e) => {
                 e.preventDefault();
                 const email = document.getElementById('auth-email').value;
@@ -1704,9 +1739,9 @@
                             <i class="fas fa-wallet"></i>
                             <span>Withdraw Funds</span>
                         </button>
-                        <button id="dashboard-privacy" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center space-x-2 border border-gray-500 font-heading shadow-custom-gray">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Ad Privacy Policy</span>
+                        <button id="dashboard-account" class="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition duration-300 flex items-center justify-center space-x-2 border border-gray-500 font-heading shadow-custom-gray">
+                            <i class="fas fa-user-cog"></i>
+                            <span>Account Settings</span>
                         </button>
                     </div>
                 </div>
@@ -1720,7 +1755,7 @@
             document.getElementById('dashboard-tasks').addEventListener('click', () => renderPage('tasks')); // New: Tasks button
             document.getElementById('dashboard-referral').addEventListener('click', () => renderPage('referral')); // New: Referral button
             document.getElementById('dashboard-withdrawal').addEventListener('click', () => renderPage('withdrawal'));
-            document.getElementById('dashboard-privacy').addEventListener('click', () => renderPage('privacy'));
+            document.getElementById('dashboard-account').addEventListener('click', () => renderPage('system-account')); // New: System Account button
             updateBalanceDisplay(); // Initial update for dashboard
             updateCooldownDisplay(); // Update cooldown on dashboard
         }
@@ -2022,6 +2057,9 @@
                 </div>
             `;
             document.getElementById('claim-referral-code-button').addEventListener('click', handleClaimReferralCode);
+            document.getElementById('referral-code-input').addEventListener('input', function() {
+                this.value = this.value.toUpperCase(); // Ensure input is always uppercase
+            });
             document.getElementById('referral-bonus-back-button').addEventListener('click', () => renderPage('dashboard'));
             updateBalanceDisplay(); // Update status message on load
         }
@@ -2180,6 +2218,216 @@
             updateCooldownDisplay(); // Update auto withdrawal cooldown display
         }
 
+        // New: Render System Account Page
+        async function renderSystemAccountPage() {
+            const mainContent = document.getElementById('main-content');
+            const currentUser = auth.currentUser;
+            const email = currentUser && currentUser.email ? currentUser.email : 'N/A';
+            const isGuest = currentUser ? currentUser.isAnonymous : true;
+            // Hide loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) loadingMessage.classList.add('hidden');
+
+            mainContent.innerHTML = `
+                <div class="p-6 bg-gray-800 rounded-lg shadow-2xl border border-gray-700 text-gray-100 max-w-xl w-full mx-auto">
+                    <h2 class="text-3xl font-extrabold text-gray-100 mb-6 text-center font-heading">Your Account</h2>
+
+                    <div class="bg-gray-900 p-6 rounded-xl shadow-md mb-8 border border-blue-600">
+                        <h3 class="text-xl font-semibold text-blue-400 mb-4 font-heading">Account Information</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+                            <div><strong class="font-heading">User ID:</strong></div>
+                            <div class="font-mono break-all" id="system-account-user-id">${userId}</div>
+
+                            <div><strong class="font-heading">Account Type:</strong></div>
+                            <div id="system-account-type">${isGuest ? 'Guest Account' : 'Email/Password Account'}</div>
+
+                            <div><strong class="font-heading">Email:</strong></div>
+                            <div id="system-account-user-email">${email}</div>
+
+                            <div><strong class="font-heading">Referral Code:</strong></div>
+                            <div class="font-mono break-all" id="system-account-referral-code">${referralCode}</div>
+                        </div>
+                    </div>
+
+                    <!-- Edit Username Section -->
+                    <div class="bg-gray-900 p-6 rounded-xl shadow-md mb-8 border border-gray-700">
+                        <h3 class="text-xl font-semibold text-gray-200 mb-4 font-heading">Edit Profile</h3>
+                        <form id="update-profile-form" class="flex flex-col gap-4">
+                            <div>
+                                <label for="username-input" class="block text-gray-200 text-sm font-bold mb-2 font-heading">Username:</label>
+                                <input
+                                    type="text"
+                                    id="username-input"
+                                    class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Your Display Name"
+                                    value="${username}"
+                                    required
+                                />
+                            </div>
+                            <button type="submit" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 font-heading">
+                                <i class="fas fa-save mr-2"></i> Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Upgrade Account Section (for anonymous users) -->
+                    ${isGuest ? `
+                        <div class="bg-gray-900 p-6 rounded-xl shadow-md mb-8 border border-green-600">
+                            <h3 class="text-xl font-semibold text-green-400 mb-4 font-heading">Upgrade Your Account</h3>
+                            <p class="text-gray-300 mb-4">Link your current progress to an email and password for permanent access.</p>
+                            <form id="upgrade-account-form" class="flex flex-col gap-4">
+                                <div>
+                                    <label for="upgrade-email" class="block text-gray-200 text-sm font-bold mb-2 font-heading">New Email:</label>
+                                    <input
+                                        type="email"
+                                        id="upgrade-email"
+                                        class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="your@email.com"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label for="upgrade-password" class="block text-gray-200 text-sm font-bold mb-2 font-heading">New Password:</label>
+                                    <input
+                                        type="password"
+                                        id="upgrade-password"
+                                        class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-green-500"
+                                        placeholder="********"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 font-heading">
+                                    <i class="fas fa-link mr-2"></i> Link Account
+                                </button>
+                            </form>
+                        </div>
+                    ` : `
+                        <!-- Change Password Section (for email/password users) -->
+                        <div class="bg-gray-900 p-6 rounded-xl shadow-md mb-8 border border-yellow-600">
+                            <h3 class="text-xl font-semibold text-yellow-400 mb-4 font-heading">Change Password</h3>
+                            <form id="change-password-form" class="flex flex-col gap-4">
+                                <div>
+                                    <label for="current-password" class="block text-gray-200 text-sm font-bold mb-2 font-heading">Current Password:</label>
+                                    <input
+                                        type="password"
+                                        id="current-password"
+                                        class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="********"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label for="new-password" class="block text-gray-200 text-sm font-bold mb-2 font-heading">New Password:</label>
+                                    <input
+                                        type="password"
+                                        id="new-password"
+                                        class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="********"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label for="confirm-new-password" class="block text-gray-200 text-sm font-bold mb-2 font-heading">Confirm New Password:</label>
+                                    <input
+                                        type="password"
+                                        id="confirm-new-password"
+                                        class="shadow appearance-none border border-gray-600 bg-gray-800 rounded-lg w-full py-3 px-4 text-gray-100 leading-tight focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                                        placeholder="********"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" class="bg-gradient-to-r from-yellow-600 to-orange-700 hover:from-orange-700 hover:to-yellow-800 text-white font-bold py-3 px-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 font-heading">
+                                    <i class="fas fa-key mr-2"></i> Change Password
+                                </button>
+                            </form>
+                        </div>
+                    `}
+
+                    <button id="system-account-back-button" class="mt-8 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-3 px-6 rounded-xl shadow-md transform hover:scale-105 transition duration-300 block mx-auto border border-gray-500 font-heading">
+                        Back to Dashboard
+                    </button>
+                </div>
+            `;
+            
+            // Event listener for updating username
+            document.getElementById('update-profile-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newUsername = document.getElementById('username-input').value.trim();
+                if (!newUsername) {
+                    showAlert("Input Error", "Username cannot be empty.", "warning");
+                    return;
+                }
+                try {
+                    await updateUserData(userId, { username: newUsername });
+                    showAlert("Profile Updated", "Your username has been updated successfully!", "success");
+                } catch (error) {
+                    console.error("Error updating username:", error);
+                    showAlert("Update Failed", error.message, "error");
+                }
+            });
+
+            // Event listener for upgrading anonymous account
+            if (isGuest) {
+                document.getElementById('upgrade-account-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('upgrade-email').value;
+                    const password = document.getElementById('upgrade-password').value;
+
+                    if (!email || !password) {
+                        showAlert("Input Error", "Please enter both email and password.", "warning");
+                        return;
+                    }
+
+                    try {
+                        const credential = EmailAuthProvider.credential(email, password);
+                        await currentUser.linkWithCredential(credential);
+                        showAlert("Account Upgraded!", "Your guest account has been successfully linked to an email and password.", "success");
+                        // Firebase automatically updates auth state, onAuthStateChanged will handle re-render
+                    } catch (error) {
+                        console.error("Error linking account:", error);
+                        showAlert("Upgrade Failed", error.message, "error");
+                    }
+                });
+            } else {
+                // Event listener for changing password (for email/password users)
+                document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const currentPassword = document.getElementById('current-password').value;
+                    const newPassword = document.getElementById('new-password').value;
+                    const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                    if (!currentPassword || !newPassword || !confirmNewPassword) {
+                        showAlert("Input Error", "All password fields are required.", "warning");
+                        return;
+                    }
+                    if (newPassword !== confirmNewPassword) {
+                        showAlert("Input Error", "New password and confirmation do not match.", "warning");
+                        return;
+                    }
+                    if (newPassword.length < 6) {
+                        showAlert("Input Error", "New password must be at least 6 characters long.", "warning");
+                        return;
+                    }
+
+                    try {
+                        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+                        await reauthenticateWithCredential(currentUser, credential);
+                        await updatePassword(currentUser, newPassword);
+                        showAlert("Password Changed!", "Your password has been updated successfully.", "success");
+                        e.target.reset(); // Clear form fields
+                    } catch (error) {
+                        console.error("Error changing password:", error);
+                        showAlert("Password Change Failed", error.message, "error");
+                    }
+                });
+            }
+
+
+            document.getElementById('system-account-back-button').addEventListener('click', () => renderPage('dashboard'));
+            updateBalanceDisplay(); // Update display with current user details
+        }
+
+
         function renderPrivacyPage() {
             const mainContent = document.getElementById('main-content');
             // Hide loading message
@@ -2269,7 +2517,10 @@
                 case 'withdrawal':
                     renderWithdrawalPage();
                     break;
-                default: // Fallback to auth or dashboard if not recognized
+                case 'system-account': // New: System Account page
+                    renderSystemAccountPage();
+                    break;
+                default: // Fallback to dashboard if recognized, otherwise auth
                     if (userId) {
                         renderDashboardPage();
                     } else {
@@ -2563,204 +2814,4 @@
                         projectId: "adwatchrewardsapp", // Replace with your actual Firebase Project ID
                         storageBucket: "adwatchrewardsapp.firebasestorage.app", // Replace with your actual Firebase Storage Bucket
                         messagingSenderId: "782268735936", // Replace with your actual Firebase Messaging Sender ID
-                        appId: "1:782268735936:web:ea82e5be5d0f44949ba825", // Replace with your actual Firebase App ID
-                        measurementId: "G-4NG2564HTK" // Replace with your actual Firebase Measurement ID
-                    };
-                    console.warn("Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
-                }
-            } else {
-                firebaseConfig = {
-                    apiKey: "AIzaSyDaAMcSZSigXawYiD7ThoB-kXMdoa9cgyY", // Replace with your actual Firebase API Key
-                    authDomain: "adwatchrewardsapp.firebaseapp.com", // Replace with your actual Firebase Auth Domain
-                    projectId: "adwatchrewardsapp", // Replace with your actual Firebase Project ID
-                    storageBucket: "adwatchrewardsapp.firebasestorage.app", // Replace with your actual Firebase Storage Bucket
-                    messagingSenderId: "782268735936", // Replace with your actual Firebase Messaging Sender ID
-                    appId: "1:782268735936:web:ea82e5be5d0f44949ba825", // Replace with your actual Firebase App ID
-                    measurementId: "G-4NG2564HTK" // Replace with your actual Firebase Measurement ID
-                };
-                console.warn("No __firebase_config found. Using placeholder Firebase config. PLEASE UPDATE THIS IN YOUR DEPLOYED CODE!");
-            }
-
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                // Removed Firebase Functions initialization as it's no longer used for client-side referral
-                console.log("Firebase initialized successfully.");
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                showAlert("Initialization Error", `Failed to connect to Firebase. Error: ${error.message}. Please check your console for details.`, "error");
-                // Attempt to render auth page even if Firebase init fails, so user isn't stuck on "Loading..."
-                renderPage('auth');
-                return; // Stop further execution if Firebase fails to initialize
-            }
-
-            // Initial authentication check using __initial_auth_token
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token !== null && __initial_auth_token !== '') {
-                try {
-                    console.log("Attempting sign-in with custom token.");
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                    console.log("Signed in with custom token.");
-                } catch (error) {
-                    console.error("Error signing in with custom token, falling back to anonymous:", error);
-                    await signInAnonymously(auth);
-                    console.log("Signed in anonymously after custom token failure.");
-                }
-            } else {
-                console.log("No custom token found, signing in anonymously.");
-                await signInAnonymously(auth);
-                console.log("Signed in anonymously.");
-            }
-
-            initCanvas(); // Initialize background canvas animation
-            initCoinRainCanvas(); // Initialize 3D coin rain canvas
-
-            // Check for referral code in URL immediately on load (for informational popup only now)
-            activeReferralCodeFromUrl = getReferralCodeFromUrl();
-
-            // Set up Auth state listener (this will now react to the initial sign-in above)
-            onAuthStateChanged(auth, async (user) => {
-                console.log("Auth state changed. User:", user ? user.uid : "null");
-                try {
-                    if (user) {
-                        userId = user.uid;
-                        // Listen for real-time updates to user data
-                        const userDocRef = doc(db, `artifacts/${appId}/users/${userId}/profile/data`);
-                        onSnapshot(userDocRef, (docSnap) => {
-                            console.log("User data snapshot received.");
-                            if (docSnap.exists()) {
-                                const data = docSnap.data();
-                                console.log("User data:", data);
-                                // Only update balance if it's different to trigger animation
-                                if (balance !== data.balance) {
-                                    displayedBalance = balance; // Set starting point for animation
-                                    balance = data.balance || 0;
-                                } else {
-                                    balance = data.balance || 0;
-                                    displayedBalance = balance; // If no change, keep displayed and actual in sync
-                                }
-
-                                adsWatched = data.adsWatched || 0;
-                                cooldownEndTime = data.cooldownEndTime || 0;
-                                spinCooldownEndTime = data.spinCooldownEndTime || 0;
-                                tasksCompleted = data.tasksCompleted || 0;
-                                taskCooldownEndTime = data.taskCooldownEndTime || 0;
-                                referralCode = data.referralCode || '';
-                                totalReferrals = data.totalReferrals || 0;
-                                referralEarnings = data.referralEarnings || 0;
-                                unclaimedReferralBalance = data.unclaimedReferralBalance || 0; // Load unclaimed balance
-                                referredBy = data.referredBy || null; // Load referredBy status
-                                savedWithdrawalMethod = data.withdrawalMethod || null; // Load saved method
-                                savedWithdrawalAddress = data.withdrawalAddress || null; // Load saved address
-                                lastAutomaticWithdrawalTime = data.lastAutomaticWithdrawalTime || 0; // Load last auto withdrawal time
-                                
-                                isAuthReady = true; // Data loaded
-                                renderPage('dashboard'); // Render dashboard after data is loaded
-                                checkAndProcessAutomaticWithdrawal(); // Check for auto withdrawal
-                            } else {
-                                // User exists but no profile data (e.g., new anonymous user or new email/password user)
-                                console.warn("User profile not found for existing user:", userId, "Attempting to create default profile.");
-                                const newReferralCode = generateReferralCode(userId);
-                                createOrUpdateUserProfile(userId, {
-                                    balance: 0,
-                                    adsWatched: 0,
-                                    cooldownEndTime: 0,
-                                    spinCooldownEndTime: 0,
-                                    tasksCompleted: 0,
-                                    taskCooldownEndTime: 0,
-                                    referralCode: newReferralCode,
-                                    totalReferrals: 0,
-                                    referralEarnings: 0,
-                                    unclaimedReferralBalance: 0, // Initialize
-                                    referredBy: null, // Initialize
-                                    withdrawalMethod: null, // Initialize
-                                    withdrawalAddress: null, // Initialize
-                                    lastAutomaticWithdrawalTime: 0, // Initialize
-                                    createdAt: Date.now()
-                                }).then(() => {
-                                    isAuthReady = true;
-                                    renderPage('dashboard');
-                                    console.log("Default profile created and dashboard rendered.");
-                                }).catch(error => {
-                                    console.error("Error creating default profile for existing user:", error);
-                                    showAlert("Error", `Failed to initialize user profile. Error: ${error.message}`, "error");
-                                    isAuthReady = true;
-                                    renderPage('auth');
-                                });
-                            }
-                        }, (error) => {
-                            console.error("Error listening to user data:", error);
-                            showAlert("Data Sync Error", `Failed to load user data in real-time. Error: ${error.message}`, "error");
-                            isAuthReady = true; // Still mark as ready
-                            renderPage('auth'); // Fallback to auth
-                        });
-                    } else {
-                        // No user is signed in.
-                        userId = null;
-                        isAuthReady = true; // Auth state checked
-                        renderPage('auth');
-                        console.log("No user signed in, rendering auth page.");
-                    }
-                } catch (authError) {
-                    console.error("Error in onAuthStateChanged callback:", authError);
-                    showAlert("Authentication Error", `An error occurred during authentication. Error: ${authError.message}`, "error");
-                    isAuthReady = true;
-                    renderPage('auth'); // Ensure auth page is rendered even on auth listener error
-                }
-            });
-
-            // Setup navigation button listeners (these are static elements)
-            document.getElementById('nav-dashboard').addEventListener('click', () => renderPage('dashboard'));
-            document.getElementById('nav-watch-ads').addEventListener('click', () => renderPage('watch-ads'));
-            document.getElementById('nav-spin-roll').addEventListener('click', () => renderPage('spin-roll'));
-            document.getElementById('nav-tasks').addEventListener('click', () => renderPage('tasks'));
-            document.getElementById('nav-referral').addEventListener('click', () => renderPage('referral'));
-            document.getElementById('nav-referral-bonus').addEventListener('click', () => renderPage('referral-bonus')); // New nav button
-            document.getElementById('nav-withdrawal').addEventListener('click', () => renderPage('withdrawal'));
-            document.getElementById('nav-privacy').addEventListener('click', () => renderPage('privacy'));
-            document.getElementById('nav-logout').addEventListener('click', logoutUser);
-
-            // Setup popup close buttons (these are static elements)
-            document.getElementById('close-ad-completion-popup').addEventListener('click', () => {
-                document.getElementById('ad-completion-popup').classList.add('hidden');
-            });
-            document.getElementById('close-task-completion-popup').addEventListener('click', () => {
-                document.getElementById('task-completion-popup').classList.add('hidden');
-            });
-            document.getElementById('close-withdrawal-popup').addEventListener('click', () => {
-                document.getElementById('withdrawal-confirmation-popup').classList.add('hidden');
-            });
-
-            // Referral Info Popup Button (for users coming from old links)
-            document.getElementById('close-referral-claim-popup').addEventListener('click', () => {
-                activeReferralCodeFromUrl = null; // Clear if user closes popup
-                window.history.replaceState({}, document.title, window.location.pathname); // Clean URL
-                document.getElementById('referral-claim-popup').classList.add('hidden');
-            });
-
-
-            // Start notification generators
-            setInterval(() => {
-                notificationQueueRight.push(generateRightNotification());
-                if (document.getElementById('live-notification-right').classList.contains('hidden')) {
-                    showRightNotification();
-                }
-            }, Math.random() * (15000 - 5000) + 5000); // Generate every 5-15 seconds
-
-            setInterval(() => {
-                notificationQueueLeft.push(generateLeftNotification());
-                if (document.getElementById('live-notification-left').classList.contains('hidden')) {
-                    showLeftNotification();
-                }
-            }, Math.random() * (20000 - 10000) + 10000); // Generate every 10-20 seconds
-
-            // Update cooldown display every second if cooldown is active
-            setInterval(() => {
-                if (isAuthReady && (cooldownEndTime > Date.now() || spinCooldownEndTime > Date.now() || taskCooldownEndTime > Date.now() || (lastAutomaticWithdrawalTime + AUTO_WITHDRAWAL_COOLDOWN_MS > Date.now()))) {
-                    updateCooldownDisplay();
-                }
-            }, 1000);
-        });
-    </script>
-</body>
-</html>
+                        appId: "1:782268735936:web:ea
