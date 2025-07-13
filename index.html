@@ -907,7 +907,7 @@
                     // but could also be set here if you prefer.
                 });
                 showAlert("Bonus Claimed!", `You received a $${referralBonusAmount.toFixed(2)} welcome bonus!`, "success");
-                triggerCoinRain(referralBonusAmount); // Trigger coin rain for the new user's bonus
+                triggerCoinRain(referralBonusAmount, selectedCurrency); // Trigger coin rain for the new user's bonus
 
                 // 2. Trigger Cloud Function to securely reward the referrer
                 // This is crucial for security as direct client-side updates to other users' profiles are blocked by Firestore rules.
@@ -969,7 +969,7 @@
                     unclaimedReferralBalance: 0 // Reset unclaimed balance
                 });
                 showAlert("Earnings Claimed!", `Successfully claimed $${amountToClaim.toFixed(2)} from your referral balance!`, "success");
-                triggerCoinRain(amountToClaim); // Trigger coin rain on successful earning
+                triggerCoinRain(amountToClaim, selectedCurrency); // Trigger coin rain on successful earning
                 renderPage('referral'); // Re-render page to update display
             } catch (error) {
                 console.error("Error claiming referral earnings:", error);
@@ -1231,7 +1231,7 @@
                         balance: increment(parseFloat(earnAmount.toFixed(2))),
                         adsWatched: increment(1)
                     });
-                    triggerCoinRain(earnAmount); // Trigger coin rain on successful earning
+                    triggerCoinRain(earnAmount, selectedCurrency); // Trigger coin rain on successful earning
 
                     if (adsWatched + 1 >= 30) { // Check against updated adsWatched
                         const fiveHoursLater = Date.now() + (5 * 60 * 60 * 1000); // 5 hours in milliseconds
@@ -1311,7 +1311,7 @@
                         spinCooldownEndTime: tenHoursLater
                     });
                     showAlert("Congratulations!", `🎉 You won $${earnAmount.toFixed(2)}! It has been added to your balance.`, "success");
-                    triggerCoinRain(earnAmount); // Trigger coin rain on successful earning
+                    triggerCoinRain(earnAmount, selectedCurrency); // Trigger coin rain on successful earning
                 } catch (error) {
                     console.error("Error updating spin data:", error);
                     showAlert("Error", "Failed to record spin. Please try again.", "error");
@@ -1360,7 +1360,7 @@
                         balance: increment(parseFloat(earnAmount.toFixed(2))),
                         tasksCompleted: increment(1)
                     });
-                    triggerCoinRain(earnAmount); // Trigger coin rain on successful earning
+                    triggerCoinRain(earnAmount, selectedCurrency); // Trigger coin rain on successful earning
 
                     if (tasksCompleted + 1 >= tasks.length) { // Check against updated tasksCompleted
                         const fiveHoursLater = Date.now() + (5 * 60 * 60 * 1000); // 5 hours in milliseconds
@@ -1416,6 +1416,7 @@
                     lastAutomaticWithdrawalTime = now;
                     updateBalanceDisplay(); // Update UI
                     updateCooldownDisplay(); // Update UI
+                    triggerCoinRain(amountToWithdraw, selectedCurrency); // Trigger coin rain for withdrawal
                 } catch (error) {
                     console.error("Error during automatic withdrawal:", error);
                     showAlert("Auto Withdrawal Failed", "An error occurred during automatic withdrawal. Please contact support.", "error");
@@ -2248,11 +2249,13 @@
                 case 'withdrawal':
                     renderWithdrawalPage();
                     break;
-                case 'privacy':
-                    renderPrivacyPage();
+                default: // Fallback to auth or dashboard if not recognized
+                    if (userId) {
+                        renderDashboardPage();
+                    } else {
+                        renderAuthPage();
+                    }
                     break;
-                default:
-                    renderAuthPage(); // Default to auth page if not logged in
             }
             updateBalanceDisplay(); // Always update display after rendering page
             updateCooldownDisplay(); // Always update cooldown display
@@ -2319,10 +2322,11 @@
         // --- Three.js Coin Rain Effect ---
         let coinScene, coinCamera, coinRenderer, coinParticles = [];
         let coinRainActive = false;
-        const coinGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32); // Radius top, bottom, height, segments
-        const coinMaterialGold = new THREE.MeshLambertMaterial({ color: 0xFFD700 }); // Gold color
-        const coinMaterialSilver = new THREE.MeshLambertMaterial({ color: 0xC0C0C0 }); // Silver color
-        const coinMaterialBronze = new THREE.MeshLambertMaterial({ color: 0xCD7F32 }); // Bronze color
+        // Increased coin size: radius 0.7, height 0.15 (from 0.5, 0.1)
+        const coinGeometry = new THREE.CylinderGeometry(0.7, 0.7, 0.15, 32);
+        const coinMaterialUSD = new THREE.MeshLambertMaterial({ color: 0xFFD700 }); // Gold color for USD
+        const coinMaterialUSDT = new THREE.MeshLambertMaterial({ color: 0xADD8E6 }); // LightBlue for USDT
+        const coinMaterialXRP = new THREE.MeshLambertMaterial({ color: 0x8A2BE2 }); // BlueViolet for XRP
 
         // Define gravity and bounce factor globally
         const gravity = -0.05; // Downward acceleration
@@ -2358,14 +2362,31 @@
             coinRenderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function createCoinMesh() {
-            const material = [coinMaterialGold, coinMaterialSilver, coinMaterialBronze][Math.floor(Math.random() * 3)];
+        // Modified to accept currency type
+        function createCoinMesh(currencyType) {
+            let material;
+            switch (currencyType) {
+                case 'USD':
+                    material = coinMaterialUSD;
+                    break;
+                case 'USDT':
+                    material = coinMaterialUSDT;
+                    break;
+                case 'XRP':
+                    material = coinMaterialXRP;
+                    break;
+                // Add more cases for other cryptocurrencies if needed
+                default:
+                    material = coinMaterialUSD; // Default to gold
+            }
             const coin = new THREE.Mesh(coinGeometry, material);
-            coin.scale.set(Math.random() * 0.5 + 0.8, Math.random() * 0.5 + 0.8, 1); // Vary size slightly
+            // Increased scale for larger coins: 1.2 to 2.0 times the base geometry
+            coin.scale.set(Math.random() * 0.8 + 1.2, Math.random() * 0.8 + 1.2, 1);
             return coin;
         }
 
-        function triggerCoinRain(amount) {
+        // Modified to accept currency type
+        function triggerCoinRain(amount, currencyType) {
             // Add a check here to ensure coinCamera is initialized
             if (!coinCamera || !coinCamera.position) {
                 console.warn("Coin rain not triggered: coinCamera not initialized.");
@@ -2377,10 +2398,11 @@
             coinRainActive = true;
             coinParticles = []; // Clear existing coins
 
-            const numCoins = Math.min(Math.floor(amount * 5), 100); // Max 100 coins, scale by amount
+            // Increased number of coins: amount * 15 (from amount * 5), max 200 (from 100)
+            const numCoins = Math.min(Math.floor(amount * 15), 200);
 
             for (let i = 0; i < numCoins; i++) {
-                const coin = createCoinMesh();
+                const coin = createCoinMesh(currencyType); // Pass currencyType
                 coin.position.x = (Math.random() - 0.5) * (coinCamera.aspect * coinCamera.position.z * 1.5); // Spread across screen width
                 coin.position.y = (Math.random() * 20) + (coinCamera.position.z / 2); // Start above screen, varied height
                 coin.position.z = (Math.random() - 0.5) * 10; // Z-depth for perspective
