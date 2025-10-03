@@ -1,582 +1,86 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MARK COIN — Single File App</title>
-  <meta name="description" content="MARK COIN - Earn coins by watching ads. Single-file frontend." />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MARK COIN</title>
   <style>
-    /* Simple styling - compact and readable */
-    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
-    *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
-    body{margin:0;background:linear-gradient(180deg,#071024 0%, #051229 100%);color:#e6eef6;min-height:100vh}
-    .wrap{max-width:1000px;margin:28px auto;padding:20px}
-    header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);box-shadow:0 4px 20px rgba(2,6,23,0.6)}
-    .brand{font-weight:700;letter-spacing:0.6px}
-    nav a{color:var(--muted);margin-left:12px;text-decoration:none;font-size:14px}
-    .card{background:var(--card);padding:16px;border-radius:12px;margin-top:16px;box-shadow:0 6px 28px rgba(2,6,23,0.6)}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
-    .btn{background:var(--accent);color:#042027;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-    input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    h1,h2{margin:0 0 8px 0}
-    .small{font-size:13px;color:var(--muted)}
-    .balance{font-size:28px;font-weight:700;color:#fff}
-    footer{margin-top:28px;text-align:center;color:var(--muted);font-size:13px}
-    a.link{color:var(--accent);text-decoration:none}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    @media(max-width:900px){.grid-3{grid-template-columns:1fr}}
-    .muted{color:var(--muted)}
-    .danger{background:#ff4d4f;color:white;padding:6px 10px;border-radius:8px;border:none}
-    .notice{background:var(--glass);padding:10px;border-radius:8px;color:var(--muted);margin-top:8px}
-    .iframe-preview{width:100%;height:360px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071124}
-    .link-box{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
+    body{margin:0;background:#071124;color:#e6eef6;font-family:Arial,Helvetica,sans-serif;}
+    header{display:flex;justify-content:space-between;align-items:center;background:#0b1220;padding:12px;}
+    nav a{color:#94a3b8;margin-left:12px;text-decoration:none;font-size:14px}
+    .brand{font-weight:700;color:#06b6d4}
+    .btn{background:#06b6d4;color:#042027;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .card{background:#0b1220;padding:14px;border-radius:10px;margin:14px;box-shadow:0 6px 18px rgba(0,0,0,0.6)}
+    .muted{color:#94a3b8}
+    iframe{width:100%;height:300px;border:0;border-radius:8px}
+    .whatsapp-btn{color:#25D366;font-weight:bold;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:6px;}
   </style>
-  <!-- Firebase CDN (modular SDK v10+) -->
-  <script type="module">
-    // We'll import Firebase modules dynamically inside the app script below.
-  </script>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="brand">MARK COIN</div>
-      <nav id="topnav">
-        <a href="#/" data-link>Home</a>
-        <a href="#/dashboard" data-link id="nav-dashboard">Dashboard</a>
-        <a href="#/web-traffic" data-link id="nav-webtraffic">Watch</a>
-        <a href="#/referrals" data-link id="nav-referrals">Referrals</a>
-        <a href="#/premium" data-link id="nav-premium">Premium</a>
-      </nav>
-    </header>
+  <header>
+    <div class="brand">MARK COIN</div>
+    <nav>
+      <a href="#/dashboard">Dashboard</a>
+      <a href="#/watch">Watch</a>
+      <a href="#/ads">Launch Ad</a>
+      <a href="#/ref">Referrals</a>
+      <a href="https://wa.me/923330737987?text=Hi,%20I%20want%20Premium%20access" class="whatsapp-btn" target="_blank">💬 Want Premium?</a>
+    </nav>
+  </header>
+  <div id="app"></div>
 
-    <div id="app"></div>
-
-    <footer>
-      Built for you — copy this file to GitHub and publish. Remember to deploy Netlify functions separately.
-    </footer>
-  </div>
-
+  <!-- Firebase -->
   <script type="module">
-  /*************************************************************************
-   * SINGLE-FILE MARK COIN FRONTEND
-   * - Replace FIREBASE_CONFIG below with your Firebase project config object.
-   * - Deploy Netlify serverless functions separately (see earlier messages).
-   * - This file is only frontend; server-side security and awarding logic
-   *   must run in Netlify functions for production (to prevent cheating).
-   *************************************************************************/
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getAuth,onAuthStateChanged,signOut } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+    import { getFirestore,doc,getDoc,updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
+      authDomain: "ad-4-u.firebaseapp.com",
+      projectId: "ad-4-u",
+      storageBucket: "ad-4-u.firebasestorage.app",
+      messagingSenderId: "775864010731",
+      appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
+      measurementId: "G-3R9DDSM2XK"
+    };
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  
-   const firebaseConfig = {
-  apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
-  authDomain: "ad-4-u.firebaseapp.com",
-  projectId: "ad-4-u",
-  storageBucket: "ad-4-u.firebasestorage.app",
-  messagingSenderId: "775864010731",
-  appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
-  measurementId: "G-3R9DDSM2XK"
-};
-  const FIREBASE_CONFIG = {
-    // >>>>>--- PASTE YOUR FIREBASE CONFIG OBJECT HERE ---<<<<<
-    // You said Firebase details are already in your conversation. Paste them here.
-  };
+    const appDiv = document.getElementById("app");
 
-  if(!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey){
-    document.getElementById('app').innerHTML = `
-      <div class="card"><h2>Firebase configuration missing</h2>
-      <p class="small">Open this file and paste your Firebase config into the FIREBASE_CONFIG object inside the script. You said you already have the Firebase details — paste them here.</p></div>
-    `;
-    throw new Error("FIREBASE_CONFIG missing — paste your config into the file");
-  }
-
-  const app = initializeApp(FIREBASE_CONFIG);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // -------------------------
-  // App state & helpers
-  // -------------------------
-  const $app = document.getElementById('app');
-
-  function q(selector){ return document.querySelector(selector) }
-
-  function navTo(hash){
-    location.hash = hash;
-    window.scrollTo(0,0);
-  }
-
-  function apiFetch(path, body){
-    // Helper to call serverless functions. Adjust base if needed.
-    return fetch(path, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(body || {})
-    }).then(r => r.json().catch(()=>({ok:false, status:r.status, text:r.statusText})))
-      .catch(err => ({ok:false, error:err.message}));
-  }
-
-  // Build header nav visibility based on login later
-  function setNavLoggedIn(loggedIn){
-    document.getElementById('nav-dashboard').style.display = loggedIn ? 'inline' : 'none';
-    document.getElementById('nav-webtraffic').style.display = loggedIn ? 'inline' : 'none';
-    document.getElementById('nav-referrals').style.display = loggedIn ? 'inline' : 'none';
-    document.getElementById('nav-premium').style.display = loggedIn ? 'inline' : 'none';
-  }
-
-  // -------------------------
-  // UI Views (render functions)
-  // -------------------------
-  function renderHome(){
-    $app.innerHTML = `
-      <div class="card">
-        <h1>MARK COIN — Earn coins by watching ads</h1>
-        <p class="small">Free & Premium users. Connect your Firebase project and deploy Netlify functions for payments & server-side awarding.</p>
-        <div style="margin-top:12px">
-          <button class="btn" id="btn-get-started">Get started — Sign up</button>
-          <button class="btn-ghost" id="btn-login">Log in</button>
+    function renderDashboard(user, data){
+      appDiv.innerHTML = `
+        <div class="card">
+          <h2>Welcome ${data.displayName || user.email}</h2>
+          <p class="muted">Role: ${data.role}</p>
+          <p class="muted">Coins: ${data.coins?.usable || 0}</p>
+          ${data.role === "premium" ? `<p>⭐ Premium active until: ${data.premiumExpiresAt?.toDate?.() || "?"}</p>` : ""}
+          <button class="btn" id="logout">Sign Out</button>
         </div>
-      </div>
+      `;
+      document.getElementById("logout").onclick = ()=>signOut(auth);
+    }
 
-      <div class="card">
-        <h2>How it works (quick)</h2>
-        <ol class="small">
-          <li>Sign up with email/password (Firebase Auth).</li>
-          <li>Go to <strong>Watch</strong> and start a session — the site will call the server to validate and award coins.</li>
-          <li>Upgrade to premium via NOWPayments (create-invoice serverless function) to increase earnings.</li>
-        </ol>
-      </div>
-    `;
-    document.getElementById('btn-get-started').onclick = ()=> navTo('/signup');
-    document.getElementById('btn-login').onclick = ()=> navTo('/login');
-  }
+    async function checkUser(user){
+      const ref = doc(db,"users",user.uid);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){ appDiv.innerHTML="<div class='card'>No user doc</div>"; return; }
+      let data = snap.data();
 
-  function renderSignup(){
-    $app.innerHTML = `
-      <div class="card" style="max-width:520px;margin:0 auto">
-        <h2>Create account</h2>
-        <div class="small">Use any email + password. We'll create a user doc in Firestore.</div>
-        <div style="height:12px"></div>
-        <label>Email</label>
-        <input id="su-email" placeholder="you@example.com" />
-        <label>Password</label>
-        <input id="su-pass" type="password" placeholder="password (6+ chars)" />
-        <div style="height:12px"></div>
-        <button class="btn" id="su-create">Create account</button>
-        <div style="height:8px"></div>
-        <div class="small">Already have an account? <a href="#/login" class="link">Log in</a></div>
-        <div id="su-msg" class="notice" style="display:none"></div>
-      </div>
-    `;
-    document.getElementById('su-create').onclick = async ()=>{
-      const email = document.getElementById('su-email').value.trim();
-      const pass = document.getElementById('su-pass').value.trim();
-      const msg = document.getElementById('su-msg');
-      msg.style.display='none';
-      if(!email || !pass){ msg.innerText='Email & password required'; msg.style.display='block'; return; }
-      try{
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        await updateProfile(cred.user, { displayName: email.split('@')[0] });
-        // create user doc
-        await setDoc(doc(db,'users',cred.user.uid), {
-          email,
-          displayName: cred.user.displayName || '',
-          createdAt: serverTimestamp(),
-          role: 'free',
-          coins: { usable: 0, pending: 0 },
-          referrals: { inviterId: null, invitedCount: 0, commission_balance: 0 }
-        });
-        msg.innerText = 'Account created. Redirecting to dashboard...'; msg.style.display='block';
-        setTimeout(()=> navTo('/dashboard'), 900);
-      }catch(err){
-        msg.innerText = 'Error: ' + err.message; msg.style.display='block';
+      // Auto downgrade if expired
+      if(data.role==="premium" && data.premiumExpiresAt && data.premiumExpiresAt.toDate()<new Date()){
+        await updateDoc(ref,{role:"free",premiumExpiresAt:null});
+        data.role="free";
       }
-    };
-  }
+      renderDashboard(user,data);
+    }
 
-  function renderLogin(){
-    $app.innerHTML = `
-      <div class="card" style="max-width:520px;margin:0 auto">
-        <h2>Log in</h2>
-        <label>Email</label>
-        <input id="li-email" placeholder="you@example.com" />
-        <label>Password</label>
-        <input id="li-pass" type="password" />
-        <div style="height:12px"></div>
-        <button class="btn" id="li-login">Log in</button>
-        <div style="height:8px"></div>
-        <div class="small">No account? <a href="#/signup" class="link">Create one</a></div>
-        <div id="li-msg" class="notice" style="display:none"></div>
-      </div>
-    `;
-    document.getElementById('li-login').onclick = async ()=>{
-      const email = document.getElementById('li-email').value.trim();
-      const pass = document.getElementById('li-pass').value.trim();
-      const msg = document.getElementById('li-msg');
-      msg.style.display='none';
-      try{
-        await signInWithEmailAndPassword(auth, email, pass);
-        msg.innerText = 'Logged in. Redirecting...'; msg.style.display='block';
-        setTimeout(()=> navTo('/dashboard'), 600);
-      }catch(err){
-        msg.innerText = 'Error: ' + err.message; msg.style.display='block';
-      }
-    };
-  }
-
-  let unsubUserSnapshot = null;
-  function renderDashboard(user){
-    // user is firebase user object
-    $app.innerHTML = `
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small">Welcome back</div>
-            <h2>${user.displayName || user.email}</h2>
-            <div class="small">UID: <span class="muted">${user.uid}</span></div>
-          </div>
-          <div style="text-align:right">
-            <div class="small">Account</div>
-            <div id="signout-wrap"><button class="btn-ghost" id="btn-signout">Sign out</button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid-3">
-        <div class="card">
-          <div class="small">Usable coins</div>
-          <div class="balance" id="coins-usable">0</div>
-        </div>
-        <div class="card">
-          <div class="small">Pending coins</div>
-          <div class="balance" id="coins-pending">0</div>
-        </div>
-        <div class="card">
-          <div class="small">Role</div>
-          <div class="balance" id="user-role">free</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Quick actions</h3>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="go-watch">Start Watching (WebTraffic)</button>
-          <button class="btn-ghost" id="go-ref">Referrals</button>
-          <button class="btn" id="go-prem">Get Premium</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Recent</h3>
-        <div id="recent-log" class="small muted">No recent events (server-side logs will appear here).</div>
-      </div>
-    `;
-
-    document.getElementById('btn-signout').onclick = async ()=>{
-      await signOut(auth);
-      navTo('/');
-    };
-
-    document.getElementById('go-watch').onclick = ()=> navTo('/web-traffic');
-    document.getElementById('go-ref').onclick = ()=> navTo('/referrals');
-    document.getElementById('go-prem').onclick = ()=> navTo('/premium');
-
-    // subscribe to user doc
-    const userRef = doc(db, 'users', user.uid);
-    if(unsubUserSnapshot) unsubUserSnapshot();
-    unsubUserSnapshot = onSnapshot(userRef, snap => {
-      if(!snap.exists()) return;
-      const data = snap.data();
-      document.getElementById('coins-usable').innerText = (data.coins?.usable||0);
-      document.getElementById('coins-pending').innerText = (data.coins?.pending||0);
-      document.getElementById('user-role').innerText = data.role || 'free';
+    onAuthStateChanged(auth,(user)=>{
+      if(user) checkUser(user);
+      else appDiv.innerHTML = "<div class='card'>Please login/signup</div>";
     });
-  }
-
-  function renderWebTraffic(user){
-    $app.innerHTML = `
-      <div class="card">
-        <h2>Web Traffic — Watch sites to earn</h2>
-        <div class="small">Enter a site to preview. Start session to begin server-verified watch (server awards coins).</div>
-        <label>Site URL</label>
-        <input id="wt-url" value="https://example.com" />
-        <div style="height:8px"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="wt-start">Start session</button>
-          <button class="btn-ghost" id="wt-stop">Stop session</button>
-        </div>
-        <div id="wt-state" class="notice" style="display:none"></div>
-      </div>
-
-      <div class="card">
-        <h3>Preview</h3>
-        <iframe id="wt-iframe" class="iframe-preview" src="about:blank"></iframe>
-      </div>
-    `;
-
-    let sessionId = null;
-    let heartbeatTimer = null;
-    const urlInput = document.getElementById('wt-url');
-    const iframe = document.getElementById('wt-iframe');
-    document.getElementById('wt-start').onclick = async ()=>{
-      const url = urlInput.value.trim();
-      if(!url){ alert('Enter a URL'); return; }
-      iframe.src = url;
-      // call server to create session
-      const payload = { url, uid: user.uid };
-      document.getElementById('wt-state').style.display='block';
-      document.getElementById('wt-state').innerText = 'Requesting session...';
-      const res = await apiFetch('/.netlify/functions/session-start', payload);
-      if(res && res.sessionId){
-        sessionId = res.sessionId;
-        document.getElementById('wt-state').innerText = 'Session started: ' + sessionId;
-        // start heartbeat every 10s
-        heartbeatTimer = setInterval(async ()=>{
-          await apiFetch('/.netlify/functions/session-heartbeat', { sessionId, uid: user.uid });
-          // Note: server will validate and award coins; frontend can't trust itself to award.
-        }, 10000);
-      } else {
-        document.getElementById('wt-state').innerText = 'Failed to start session: ' + (res.error || JSON.stringify(res));
-      }
-    };
-
-    document.getElementById('wt-stop').onclick = async ()=>{
-      if(heartbeatTimer) clearInterval(heartbeatTimer);
-      heartbeatTimer = null;
-      if(sessionId){
-        // Ideally call server to finalize session (not implemented here)
-        document.getElementById('wt-state').innerText = 'Session stopped: ' + sessionId;
-        sessionId = null;
-      } else {
-        document.getElementById('wt-state').innerText = 'No active session';
-      }
-    };
-  }
-
-  function renderReferrals(user){
-    const referralLink = location.origin + '/?ref=' + encodeURIComponent(user.uid);
-    $app.innerHTML = `
-      <div class="card">
-        <h2>Referrals</h2>
-        <div class="small">Share the link below. When someone signs up using your link, you'll get commissions (configured server-side).</div>
-        <div style="height:8px"></div>
-        <div class="link-box">${referralLink}</div>
-        <div style="height:12px"></div>
-        <button class="btn" id="copy-ref">Copy link</button>
-        <div style="height:12px"></div>
-        <div class="small">Commission balance (server-tracked): <strong id="ref-comm">0</strong></div>
-        <div style="height:12px"></div>
-        <button class="btn-ghost" id="collect-ref">Collect commissions</button>
-        <div id="ref-msg" class="notice" style="display:none"></div>
-      </div>
-    `;
-    document.getElementById('copy-ref').onclick = ()=> {
-      navigator.clipboard.writeText(referralLink);
-      alert('Referral link copied');
-    };
-    document.getElementById('collect-ref').onclick = async ()=>{
-      // calls serverless to move pending commissions to usable
-      const res = await apiFetch('/.netlify/functions/referral-collect', { uid: user.uid });
-      document.getElementById('ref-msg').style.display='block';
-      if(res && res.ok !== false){
-        document.getElementById('ref-msg').innerText = 'Collect request sent. Check dashboard.';
-      } else {
-        document.getElementById('ref-msg').innerText = 'Error: ' + (res.error || JSON.stringify(res));
-      }
-    };
-
-    // subscribe to user's referral data
-    const userRef = doc(db, 'users', user.uid);
-    if(unsubUserSnapshot) unsubUserSnapshot();
-    unsubUserSnapshot = onSnapshot(userRef, snap => {
-      if(!snap.exists()) return;
-      const data = snap.data();
-      document.getElementById('ref-comm').innerText = (data.referrals?.commission_balance||0);
-    });
-  }
-
-  function renderPremium(user){
-    $app.innerHTML = `
-      <div class="card">
-        <h2>Premium plans</h2>
-        <div class="small">Upgrade to get better earnings and priority features. Payments processed via NOWPayments (server-created invoice).</div>
-        <div style="height:10px"></div>
-        <div style="display:flex;gap:10px">
-          <div style="flex:1" class="card">
-            <div class="small">Weekly</div>
-            <div class="balance">USD $3</div>
-            <div style="height:8px"></div>
-            <button class="btn" id="buy-weekly">Buy Weekly</button>
-          </div>
-          <div style="flex:1" class="card">
-            <div class="small">Monthly</div>
-            <div class="balance">USD $10</div>
-            <div style="height:8px"></div>
-            <button class="btn" id="buy-monthly">Buy Monthly</button>
-          </div>
-        </div>
-
-        <div id="invoice-area" style="margin-top:12px;display:none"></div>
-      </div>
-    `;
-
-    document.getElementById('buy-weekly').onclick = ()=> createInvoice(user.uid,'weekly');
-    document.getElementById('buy-monthly').onclick = ()=> createInvoice(user.uid,'monthly');
-  }
-
-  async function createInvoice(uid, plan){
-    // Calls Netlify function to create NOWPayments invoice. Netlify function must be deployed.
-    const area = document.getElementById('invoice-area');
-    area.style.display='block';
-    area.innerText = 'Creating invoice...';
-    const res = await apiFetch('/.netlify/functions/create-invoice', { uid, plan });
-    if(res && res.invoice && res.invoice.invoice_url){
-      area.innerHTML = `<div class="small">Invoice created. Pay using the button below. After payment the server webhook will mark your account premium.</div>
-                        <div style="height:8px"></div>
-                        <a class="btn" href="${res.invoice.invoice_url}" target="_blank">Open payment</a>`;
-    } else {
-      area.innerHTML = `<div class="notice">Failed to create invoice: ${JSON.stringify(res)}</div>`;
-    }
-  }
-
-  function renderAdsLaunch(user){
-    $app.innerHTML = `
-      <div class="card">
-        <h2>Launch an Ad Campaign (Advertiser)</h2>
-        <div class="small">This will call serverless to reserve budget and create an ad record (server will deduct coins).</div>
-        <label>Target URL</label><input id="ad-url" placeholder="https://example.com" />
-        <label>Cost per Impression (coins)</label><input id="ad-cost" value="1" type="number" />
-        <label>Budget (total coins)</label><input id="ad-budget" value="100" type="number" />
-        <div style="height:8px"></div>
-        <button class="btn" id="ad-launch">Launch Ad</button>
-        <div id="ad-res" class="notice" style="display:none"></div>
-      </div>
-    `;
-
-    document.getElementById('ad-launch').onclick = async ()=>{
-      const target = document.getElementById('ad-url').value.trim();
-      const cost = Number(document.getElementById('ad-cost').value || 1);
-      const budget = Number(document.getElementById('ad-budget').value || 100);
-      const res = await apiFetch('/.netlify/functions/ad-launch', { uid: user.uid, ownerId: user.uid, targetUrl: target, cost_per_impression: cost, budget_coins: budget });
-      const el = document.getElementById('ad-res');
-      el.style.display='block';
-      if(res && res.ok !== false){
-        el.innerText = 'Ad created. ID: ' + (res.adId || JSON.stringify(res));
-      } else {
-        el.innerText = 'Error: ' + (res.error || JSON.stringify(res));
-      }
-    };
-  }
-
-  // -------------------------
-  // Router
-  // -------------------------
-  let currentUser = null;
-  function route(){
-    const path = (location.hash || '#/').slice(1);
-    if(!currentUser){
-      // user not logged in
-      if(path === '/signup') return renderSignup();
-      if(path === '/login') return renderLogin();
-      return renderHome();
-    } else {
-      // logged in
-      if(path === '/' || path === '') return renderDashboard(currentUser);
-      if(path === '/dashboard') return renderDashboard(currentUser);
-      if(path === '/web-traffic') return renderWebTraffic(currentUser);
-      if(path === '/referrals') return renderReferrals(currentUser);
-      if(path === '/premium') return renderPremium(currentUser);
-      if(path === '/ads') return renderAdsLaunch(currentUser);
-      // default
-      return renderDashboard(currentUser);
-    }
-  }
-
-  window.addEventListener('hashchange', route);
-
-  // -------------------------
-  // Auth listener
-  // -------------------------
-  onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
-    setNavLoggedIn(!!user);
-    if(user){
-      // ensure user doc exists
-      try{
-        const ud = await getDoc(doc(db,'users',user.uid));
-        if(!ud.exists()){
-          await setDoc(doc(db,'users',user.uid), {
-            email: user.email,
-            displayName: user.displayName || '',
-            createdAt: serverTimestamp(),
-            role: 'free',
-            coins: { usable: 0, pending: 0 },
-            referrals: { inviterId: null, invitedCount: 0, commission_balance: 0 }
-          });
-        }
-      }catch(e){
-        console.warn('Error ensuring user doc', e);
-      }
-    } else {
-      // logged out: unsubscribe if existed
-      if(unsubUserSnapshot) { unsubUserSnapshot(); unsubUserSnapshot = null; }
-    }
-    route();
-  });
-
-  // initial route render
-  route();
-
-  // Utility: If landing has ?ref=... param (user arrived with referral), store in localStorage so when they sign up we can attach inviterId server-side.
-  (function handleReferralParam(){
-    const params = new URLSearchParams(location.search);
-    const ref = params.get('ref');
-    if(ref){
-      localStorage.setItem('markcoin_referrer', ref);
-      // keep the url clean
-      history.replaceState({}, '', location.pathname);
-    }
-  })();
-
-  // On new account creation, server-side should read localStorage ref via client and attach to user doc.
-  // Below: helper that runs on signup page to auto-fill inviterId into user doc if present.
-  async function attachInviterIfExists(uid){
-    const ref = localStorage.getItem('markcoin_referrer');
-    if(!ref) return;
-    try{
-      await updateDoc(doc(db,'users',uid), { 'referrals.inviterId': ref } );
-      // Optionally notify server (via function) to credit inviter partially; server must handle final commission awarding.
-      // Example:
-      // await apiFetch('/.netlify/functions/register-referral', {uid, inviterId: ref});
-    }catch(e){
-      console.warn('attachInviter failed', e);
-    }
-  }
-
-  // Hook: after createUserWithEmailAndPassword in Signup view, call attachInviterIfExists( uid ).
-  // Because the signup flow above creates the doc and then navigates, we can also call it here by observation:
-  // We'll listen for new onAuth and attempt to attach if doc exists but no inviterId set.
-  onAuthStateChanged(auth, async (u) => {
-    if(!u) return;
-    try{
-      const ud = await getDoc(doc(db,'users',u.uid));
-      if(ud.exists()){
-        const data = ud.data();
-        if(!data.referrals?.inviterId){
-          await attachInviterIfExists(u.uid);
-        }
-      }
-    }catch(e){
-      console.warn('post-auth attachInviter error', e);
-    }
-  });
-
-  // Expose some helpers for debugging in console
-  window.MARKCOIN = { auth, db, apiFetch };
   </script>
 </body>
 </html>
