@@ -1,1539 +1,584 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FreeAdCoin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #0f172a;
-            color: #f3f4f6;
-            background-image: radial-gradient(at 50% 100%, #1e3a8a, #0c4a6e);
-            background-size: cover;
-            background-attachment: fixed;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 900px;
-        }
-        .card {
-            background-color: rgba(31, 41, 55, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(75, 85, 99, 0.5);
-            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-        .nav-link {
-            transition: all 0.3s ease-in-out;
-            border-bottom: 2px solid transparent;
-            color: #9ca3af;
-        }
-        .nav-link:hover {
-            color: #ffffff;
-            border-bottom-color: #3b82f6;
-            transform: translateY(-2px);
-        }
-        .button-primary {
-            transition: all 0.3s ease-in-out;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .button-primary:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
-        }
-        .loading-spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #ffffff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .social-icon {
-            filter: grayscale(100%);
-            transition: all 0.3s ease-in-out;
-        }
-        .social-icon:hover {
-            filter: grayscale(0%);
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-        .tab-button.active {
-            background-color: #1f2937;
-            color: #ffffff;
-            border-bottom-color: #3b82f6;
-        }
-        #ad-iframe {
-            width: 100%;
-            height: 400px;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="tel"],
-        input[type="url"],
-        input[type="number"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #4b5563;
-            border-radius: 0.5rem;
-            margin-top: 0.5rem;
-            background-color: #1f2937;
-            color: #f3f4f6;
-            transition: all 0.2s;
-        }
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus,
-        input[type="tel"]:focus,
-        input[type="url"]:focus,
-        input[type="number"]:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-        .alert-box {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            text-align: center;
-        }
-        .alert-success {
-            background-color: #10b981;
-            color: #1f2937;
-        }
-        .alert-error {
-            background-color: #ef4444;
-            color: #1f2937;
-        }
-        .shooting-star-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 50;
-        }
-        .shooting-star {
-            position: absolute;
-            background: linear-gradient(90deg, #fff, transparent);
-            width: 100px;
-            height: 2px;
-            transform: rotate(45deg);
-            animation: shoot 5s ease-out infinite;
-            opacity: 0;
-        }
-        @keyframes shoot {
-            0% {
-                transform: translate(0, 0) rotate(45deg);
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-            }
-            100% {
-                transform: translate(200vw, 200vh) rotate(45deg);
-                opacity: 0;
-            }
-        }
-        .calibration-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2.5rem;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-            color: #3b82f6;
-            animation: calibrate 3s ease-in-out forwards;
-            opacity: 0;
-            z-index: 60;
-        }
-        @keyframes calibrate {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        .coin-earned-effect {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 3rem;
-            font-weight: bold;
-            color: #FFD700;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
-            animation: fadeInOut 2s ease-out forwards;
-            pointer-events: none;
-            z-index: 100;
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
-            100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
-        }
-        .cooldown-text {
-            color: #ef4444;
-            font-weight: bold;
-        }
-        .countdown-display {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #3b82f6;
-            text-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
-        }
-        .premium-ad-indicator {
-            background-color: #D97706;
-            color: #1F2937;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        /* New styles for the premium ad notification */
-        .premium-notification {
-            font-weight: 800;
-            font-size: 1.5rem;
-            letter-spacing: 0.05em;
-            text-align: center;
-            background: linear-gradient(to right, #ef4444, #f97316, #eab308, #84cc16, #22c55e, #3b82f6, #6366f1, #a855f7, #d946ef, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            animation: gradient-flow 3s linear infinite;
-        }
-
-        @keyframes gradient-flow {
-            to {
-                background-position: 200% center;
-            }
-        }
-
-        /* Transfer page specific styles */
-        .transfer-history-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(31, 41, 55, 0.5);
-            border: 1px solid rgba(75, 85, 99, 0.5);
-        }
-        .transfer-history-item.sent {
-            background-color: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-        .transfer-history-item.received {
-            background-color: rgba(34, 197, 94, 0.2);
-            border-color: rgba(34, 197, 94, 0.5);
-        }
-        
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MARK COIN — Single File App</title>
+  <meta name="description" content="MARK COIN - Earn coins by watching ads. Single-file frontend." />
+  <style>
+    /* Simple styling - compact and readable */
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#06b6d4;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    body{margin:0;background:linear-gradient(180deg,#071024 0%, #051229 100%);color:#e6eef6;min-height:100vh}
+    .wrap{max-width:1000px;margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);box-shadow:0 4px 20px rgba(2,6,23,0.6)}
+    .brand{font-weight:700;letter-spacing:0.6px}
+    nav a{color:var(--muted);margin-left:12px;text-decoration:none;font-size:14px}
+    .card{background:var(--card);padding:16px;border-radius:12px;margin-top:16px;box-shadow:0 6px 28px rgba(2,6,23,0.6)}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{background:var(--accent);color:#042027;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    h1,h2{margin:0 0 8px 0}
+    .small{font-size:13px;color:var(--muted)}
+    .balance{font-size:28px;font-weight:700;color:#fff}
+    footer{margin-top:28px;text-align:center;color:var(--muted);font-size:13px}
+    a.link{color:var(--accent);text-decoration:none}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:900px){.grid-3{grid-template-columns:1fr}}
+    .muted{color:var(--muted)}
+    .danger{background:#ff4d4f;color:white;padding:6px 10px;border-radius:8px;border:none}
+    .notice{background:var(--glass);padding:10px;border-radius:8px;color:var(--muted);margin-top:8px}
+    .iframe-preview{width:100%;height:360px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:#071124}
+    .link-box{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
+  </style>
+  <!-- Firebase CDN (modular SDK v10+) -->
+  <script type="module">
+    // We'll import Firebase modules dynamically inside the app script below.
+  </script>
 </head>
-<body class="bg-gray-900 flex flex-col items-center justify-center p-4">
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">MARK COIN</div>
+      <nav id="topnav">
+        <a href="#/" data-link>Home</a>
+        <a href="#/dashboard" data-link id="nav-dashboard">Dashboard</a>
+        <a href="#/web-traffic" data-link id="nav-webtraffic">Watch</a>
+        <a href="#/referrals" data-link id="nav-referrals">Referrals</a>
+        <a href="#/premium" data-link id="nav-premium">Premium</a>
+      </nav>
+    </header>
 
-    <!-- Loading Screen -->
-    <div id="loading" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 z-50">
-        <div class="loading-spinner"></div>
-    </div>
-    
-    <!-- Calibration Message -->
-    <div id="calibration-message" class="calibration-message hidden">
-        Calibrating...
-    </div>
+    <div id="app"></div>
 
-    <!-- Shooting Stars Container -->
-    <div id="shooting-star-container" class="shooting-star-container hidden"></div>
+    <footer>
+      Built for you — copy this file to GitHub and publish. Remember to deploy Netlify functions separately.
+    </footer>
+  </div>
 
-    <div id="app" class="container mx-auto p-6 rounded-xl shadow-lg border border-gray-700 card my-8 hidden">
+  <script type="module">
+  /*************************************************************************
+   * SINGLE-FILE MARK COIN FRONTEND
+   * - Replace FIREBASE_CONFIG below with your Firebase project config object.
+   * - Deploy Netlify serverless functions separately (see earlier messages).
+   * - This file is only frontend; server-side security and awarding logic
+   *   must run in Netlify functions for production (to prevent cheating).
+   *************************************************************************/
 
-        <!-- Authentication Section (Login/Sign Up View) -->
-        <section id="auth-section" class="space-y-6">
-            <header class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-100">FreeAdCoin</h1>
-                <p class="text-lg text-gray-400 mt-2">Sign in or create an account to get started.</p>
-            </header>
-            
-            <div class="p-2 flex flex-wrap justify-center space-x-2 rounded-full bg-gray-800 border border-gray-700 mb-4">
-                <button id="login-tab" class="tab-button active py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Login</button>
-                <button id="signup-tab" class="tab-button py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Sign Up</button>
-            </div>
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-            <!-- Login View -->
-            <div id="login-view" class="space-y-4">
-                <div class="p-6 rounded-lg border border-gray-700 card space-y-4">
-                    <div>
-                        <label for="login-email" class="block text-sm font-medium text-gray-300">Email</label>
-                        <input type="email" id="login-email" placeholder="email@example.com" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm">
-                    </div>
-                    <div>
-                        <label for="login-password" class="block text-sm font-medium text-gray-300">Password</label>
-                        <input type="password" id="login-password" placeholder="••••••••" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm">
-                    </div>
-                    <button id="login-submit-btn" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors button-primary">
-                        Login
-                    </button>
-                    <a href="#" id="forgot-password-link" class="block text-center text-sm text-blue-400 hover:underline">Forgot Password?</a>
-                </div>
-            </div>
+  // -------------------------
+  // PASTE YOUR FIREBASE CONFIG BELOW
+  // -------------------------
+  // Example:
+  // const FIREBASE_CONFIG = {
+  //   apiKey: "REPLACE",
+  //   authDomain: "REPLACE",
+  //   projectId: "REPLACE",
+  //   storageBucket: "REPLACE",
+  //   messagingSenderId: "REPLACE",
+  //   appId: "REPLACE"
+  // }
+  const FIREBASE_CONFIG = {
+    // >>>>>--- PASTE YOUR FIREBASE CONFIG OBJECT HERE ---<<<<<
+    // You said Firebase details are already in your conversation. Paste them here.
+  };
 
-            <!-- Sign Up View -->
-            <div id="signup-view" class="space-y-4 hidden">
-                <div class="p-6 rounded-lg border border-gray-700 card space-y-4">
-                    <div>
-                        <label for="signup-email" class="block text-sm font-medium text-gray-300">Email</label>
-                        <input type="email" id="signup-email" placeholder="email@example.com" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm">
-                    </div>
-                    <div>
-                        <label for="signup-password" class="block text-sm font-medium text-gray-300">Password</label>
-                        <input type="password" id="signup-password" placeholder="••••••••" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm">
-                    </div>
-                    <button id="signup-submit-btn" class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors button-primary">
-                        Sign Up
-                    </button>
-                </div>
-            </div>
+  if(!FIREBASE_CONFIG || !FIREBASE_CONFIG.apiKey){
+    document.getElementById('app').innerHTML = `
+      <div class="card"><h2>Firebase configuration missing</h2>
+      <p class="small">Open this file and paste your Firebase config into the FIREBASE_CONFIG object inside the script. You said you already have the Firebase details — paste them here.</p></div>
+    `;
+    throw new Error("FIREBASE_CONFIG missing — paste your config into the file");
+  }
 
-            <p id="auth-message" class="text-center text-sm text-gray-400"></p>
-        </section>
+  const app = initializeApp(FIREBASE_CONFIG);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-        <!-- Main Content Sections - Hidden initially -->
-        <div id="main-app-content" class="hidden">
-            <header id="main-header" class="text-center mb-8">
-                <h1 class="text-4xl font-bold text-gray-100">FreeAdCoin</h1>
-                <p class="text-sm text-gray-400 mt-2">Earn coins by viewing ads, and spend them to promote your own!</p>
-            </header>
-            
-            <nav id="main-nav" class="flex flex-wrap justify-center space-x-2 md:space-x-4 mb-8 p-2 rounded-full bg-gray-800 border border-gray-700">
-                <button data-view="dashboard-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Dashboard</button>
-                <button data-view="earning-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Earning</button>
-                <button data-view="ads-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Ads</button>
-                <button data-view="transfer-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Transfer</button>
-                <button data-view="referral-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Referral</button>
-                <button data-view="contact-section" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Contact Us</button>
-                <button id="sign-out-btn" class="nav-link py-2 px-4 rounded-full text-sm font-semibold text-red-400 hover:text-red-500 transition-colors">Sign Out</button>
-            </nav>
-            
-            <main class="space-y-8">
-                <!-- Dashboard Section -->
-                <section id="dashboard-section" class="space-y-6">
-                    <div class="p-6 rounded-lg border border-gray-700 card text-gray-200">
-                        <h2 class="text-2xl font-semibold mb-4 text-gray-100">Your Dashboard</h2>
-                        <div class="flex flex-col items-center justify-center space-y-4">
-                             <div class="text-center">
-                                 <p class="text-sm text-gray-400">Current Coins:</p>
-                                 <p id="coin-balance" class="text-6xl font-bold text-yellow-400 mt-1">0</p>
-                            </div>
-                            <p class="text-sm text-gray-400 text-center">Your User ID:</p>
-                            <p id="user-id" class="text-sm text-gray-400 font-mono break-all"></p>
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <button id="view-ads-btn" class="p-6 bg-green-600 text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-colors button-primary">
-                            View Ads & Earn
-                        </button>
-                        <button id="create-ad-btn" class="p-6 bg-purple-600 text-white font-bold rounded-lg shadow-md hover:bg-purple-700 transition-colors button-primary">
-                            Create an Ad
-                        </button>
-                        <button id="upgrade-premium-btn" class="p-6 bg-yellow-600 text-white font-bold rounded-lg shadow-md hover:bg-yellow-700 transition-colors button-primary">
-                            Upgrade to Premium
-                        </button>
-                    </div>
-                </section>
+  // -------------------------
+  // App state & helpers
+  // -------------------------
+  const $app = document.getElementById('app');
 
-                <!-- Earning Section -->
-                <section id="earning-section" class="space-y-6 hidden">
-                    <h2 class="text-2xl font-semibold text-gray-100">View Ads</h2>
-                    <div class="p-2 flex flex-wrap justify-center space-x-2 rounded-full bg-gray-800 border border-gray-700 mb-4">
-                        <button id="impressions-tab" class="tab-button active py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Website Impressions</button>
-                        <button id="direct-links-tab" class="tab-button py-2 px-4 rounded-full text-sm font-semibold text-gray-400 hover:text-white transition-colors">Ad Links</button>
-                    </div>
-                    
-                    <div id="impressions-view" class="space-y-4">
-                        <h3 class="text-xl font-semibold text-gray-100">Website Impressions</h3>
-                        <div class="p-6 rounded-lg border border-gray-700 card space-y-4">
-                            <!-- Premium Ad Notification -->
-                            <div id="premium-ad-notification" class="premium-notification hidden">
-                                You are viewing a premium user link!
-                            </div>
-                            
-                            <button id="start-impressions-btn" class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 transition-colors button-primary">
-                                Start Watching Ads
-                            </button>
-                            <button id="stop-impressions-btn" class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition-colors button-primary hidden">Stop Watching Ads</button>
-                            <p id="countdown-display" class="countdown-display text-center hidden"></p>
-                            <iframe id="ad-iframe" class="w-full h-96 rounded-md border border-gray-600 bg-white hidden" src="about:blank" frameborder="0"></iframe>
-                        </div>
-                    </div>
+  function q(selector){ return document.querySelector(selector) }
 
-                    <div id="direct-links-view" class="space-y-4 hidden">
-                        <h3 class="text-xl font-semibold text-gray-100">Ad Links</h3>
-                        <div id="direct-links-ads-list" class="space-y-4">
-                           <!-- Direct links (regular and premium) will be dynamically added here -->
-                        </div>
-                    </div>
-                </section>
+  function navTo(hash){
+    location.hash = hash;
+    window.scrollTo(0,0);
+  }
 
-                <!-- Ads Section (formerly Create Ad) -->
-                <section id="ads-section" class="space-y-6 hidden">
-                    <h2 class="text-2xl font-semibold text-gray-100">Create New Ad</h2>
-                    <div class="p-6 rounded-lg border border-gray-700 card">
-                        <div class="mb-4">
-                            <label for="ad-url" class="block text-sm font-medium text-gray-300">Website URL</label>
-                            <input type="url" id="ad-url" placeholder="https://www.example.com" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div class="mb-4">
-                            <label for="ad-type" class="block text-sm font-medium text-gray-300">Ad Type</label>
-                            <select id="ad-type" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="impression">Website Impressions</option>
-                                <option value="direct-link">Direct Link</option>
-                            </select>
-                        </div>
-                        <div class="mb-4 flex items-center">
-                            <input type="checkbox" id="is-premium" class="form-checkbox h-4 w-4 text-purple-600 rounded-lg">
-                            <label for="is-premium" class="ml-2 text-sm font-medium text-gray-300">Create as Premium Ad (Higher Cost, Higher Payout)</label>
-                        </div>
-                        <div class="mb-4">
-                            <label for="ad-views" class="block text-sm font-medium text-gray-300">Number of Views</label>
-                            <input type="number" id="ad-views" value="1" min="1" step="1" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <p class="text-sm text-gray-400 mb-4">Total Cost: <span id="ad-cost" class="font-bold text-yellow-400">300</span> coins</p>
-                        <button id="create-ad-submit-btn" class="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-colors button-primary">Create Ad</button>
-                    </div>
-                </section>
+  function apiFetch(path, body){
+    // Helper to call serverless functions. Adjust base if needed.
+    return fetch(path, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body || {})
+    }).then(r => r.json().catch(()=>({ok:false, status:r.status, text:r.statusText})))
+      .catch(err => ({ok:false, error:err.message}));
+  }
 
-                <!-- New Transfer Section -->
-                <section id="transfer-section" class="space-y-6 hidden">
-                    <h2 class="text-2xl font-semibold text-gray-100">Transfer Coins</h2>
-                    <div class="p-6 rounded-lg border border-gray-700 card">
-                        <div class="flex flex-col items-center justify-center space-y-4 mb-4">
-                            <div class="text-center">
-                                <p class="text-sm text-gray-400">Your Current Coins:</p>
-                                <p id="transfer-balance" class="text-4xl font-bold text-yellow-400 mt-1">0</p>
-                            </div>
-                            <p class="text-sm text-gray-400 text-center">Your User ID:</p>
-                            <p id="transfer-user-id" class="text-sm text-gray-400 font-mono break-all"></p>
-                        </div>
+  // Build header nav visibility based on login later
+  function setNavLoggedIn(loggedIn){
+    document.getElementById('nav-dashboard').style.display = loggedIn ? 'inline' : 'none';
+    document.getElementById('nav-webtraffic').style.display = loggedIn ? 'inline' : 'none';
+    document.getElementById('nav-referrals').style.display = loggedIn ? 'inline' : 'none';
+    document.getElementById('nav-premium').style.display = loggedIn ? 'inline' : 'none';
+  }
 
-                        <div class="space-y-4">
-                            <div>
-                                <label for="recipient-id" class="block text-sm font-medium text-gray-300">Recipient's User ID</label>
-                                <input type="text" id="recipient-id" placeholder="Enter recipient's user ID" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label for="amount-to-transfer" class="block text-sm font-medium text-gray-300">Amount to Transfer</label>
-                                <input type="number" id="amount-to-transfer" value="1" min="1" step="1" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <button id="transfer-submit-btn" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors button-primary">
-                                Transfer Coins
-                            </button>
-                        </div>
-                    </div>
+  // -------------------------
+  // UI Views (render functions)
+  // -------------------------
+  function renderHome(){
+    $app.innerHTML = `
+      <div class="card">
+        <h1>MARK COIN — Earn coins by watching ads</h1>
+        <p class="small">Free & Premium users. Connect your Firebase project and deploy Netlify functions for payments & server-side awarding.</p>
+        <div style="margin-top:12px">
+          <button class="btn" id="btn-get-started">Get started — Sign up</button>
+          <button class="btn-ghost" id="btn-login">Log in</button>
+        </div>
+      </div>
 
-                    <div class="p-6 rounded-lg border border-gray-700 card">
-                        <h3 class="text-xl font-semibold text-gray-100 mb-4">Recent Transfers</h3>
-                        <div id="transfer-history-list" class="space-y-3">
-                            <!-- Transfer history items will be dynamically added here -->
-                        </div>
-                    </div>
-                </section>
+      <div class="card">
+        <h2>How it works (quick)</h2>
+        <ol class="small">
+          <li>Sign up with email/password (Firebase Auth).</li>
+          <li>Go to <strong>Watch</strong> and start a session — the site will call the server to validate and award coins.</li>
+          <li>Upgrade to premium via NOWPayments (create-invoice serverless function) to increase earnings.</li>
+        </ol>
+      </div>
+    `;
+    document.getElementById('btn-get-started').onclick = ()=> navTo('/signup');
+    document.getElementById('btn-login').onclick = ()=> navTo('/login');
+  }
 
+  function renderSignup(){
+    $app.innerHTML = `
+      <div class="card" style="max-width:520px;margin:0 auto">
+        <h2>Create account</h2>
+        <div class="small">Use any email + password. We'll create a user doc in Firestore.</div>
+        <div style="height:12px"></div>
+        <label>Email</label>
+        <input id="su-email" placeholder="you@example.com" />
+        <label>Password</label>
+        <input id="su-pass" type="password" placeholder="password (6+ chars)" />
+        <div style="height:12px"></div>
+        <button class="btn" id="su-create">Create account</button>
+        <div style="height:8px"></div>
+        <div class="small">Already have an account? <a href="#/login" class="link">Log in</a></div>
+        <div id="su-msg" class="notice" style="display:none"></div>
+      </div>
+    `;
+    document.getElementById('su-create').onclick = async ()=>{
+      const email = document.getElementById('su-email').value.trim();
+      const pass = document.getElementById('su-pass').value.trim();
+      const msg = document.getElementById('su-msg');
+      msg.style.display='none';
+      if(!email || !pass){ msg.innerText='Email & password required'; msg.style.display='block'; return; }
+      try{
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await updateProfile(cred.user, { displayName: email.split('@')[0] });
+        // create user doc
+        await setDoc(doc(db,'users',cred.user.uid), {
+          email,
+          displayName: cred.user.displayName || '',
+          createdAt: serverTimestamp(),
+          role: 'free',
+          coins: { usable: 0, pending: 0 },
+          referrals: { inviterId: null, invitedCount: 0, commission_balance: 0 }
+        });
+        msg.innerText = 'Account created. Redirecting to dashboard...'; msg.style.display='block';
+        setTimeout(()=> navTo('/dashboard'), 900);
+      }catch(err){
+        msg.innerText = 'Error: ' + err.message; msg.style.display='block';
+      }
+    };
+  }
 
-                <!-- Referral Section -->
-                <section id="referral-section" class="space-y-6 hidden">
-                    <h2 class="text-2xl font-semibold text-gray-100">Refer & Earn!</h2>
-                    <div class="p-6 rounded-lg border border-gray-700 card">
-                        <p class="text-center text-gray-400 mb-4">Invite your friends and earn rewards when they sign up and start earning coins.</p>
-                        <div class="bg-gray-800 p-4 rounded-xl mb-4">
-                            <h3 class="text-lg font-semibold text-gray-100 mb-2">Your Referral Link</h3>
-                            <div class="flex items-center space-x-2">
-                                <input id="referral-link-input" type="text" readonly
-                                    class="flex-1 bg-gray-700 border border-gray-600 rounded-lg py-2 px-3 text-gray-300 font-mono cursor-pointer overflow-hidden whitespace-nowrap text-ellipsis" />
-                                <button id="copy-link-btn" class="bg-blue-600 text-white rounded-lg p-2 hover:bg-blue-700 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                                        <path
-                                            d="M7.5 3.375c-1.036 0-1.875.84-1.875 1.875v1.5c0 1.036.84 1.875 1.875 1.875h7.5c1.036 0 1.875-.84 1.875-1.875V4.5c0-1.036-.84-1.875-1.875-1.875h-7.5Z" />
-                                        <path fill-rule="evenodd"
-                                            d="M3.091 8.25H12.75A2.25 2.25 0 0 1 15 10.5v7.5a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18V10.5a2.25 2.25 0 0 1 .091-2.25Zm1.409 0a.75.75 0 0 0 0 1.5h-.75A.75.75 0 0 0 3 9v9.75c0 .414.336.75.75.75h9.75a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 1-.75.75H4.5a.75.75 0 0 1-.75-.75V9a.75.75 0 0 1 .75-.75h.75Z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div id="copy-success" class="text-green-400 text-sm mt-2 hidden">Link copied!</div>
-                        </div>
+  function renderLogin(){
+    $app.innerHTML = `
+      <div class="card" style="max-width:520px;margin:0 auto">
+        <h2>Log in</h2>
+        <label>Email</label>
+        <input id="li-email" placeholder="you@example.com" />
+        <label>Password</label>
+        <input id="li-pass" type="password" />
+        <div style="height:12px"></div>
+        <button class="btn" id="li-login">Log in</button>
+        <div style="height:8px"></div>
+        <div class="small">No account? <a href="#/signup" class="link">Create one</a></div>
+        <div id="li-msg" class="notice" style="display:none"></div>
+      </div>
+    `;
+    document.getElementById('li-login').onclick = async ()=>{
+      const email = document.getElementById('li-email').value.trim();
+      const pass = document.getElementById('li-pass').value.trim();
+      const msg = document.getElementById('li-msg');
+      msg.style.display='none';
+      try{
+        await signInWithEmailAndPassword(auth, email, pass);
+        msg.innerText = 'Logged in. Redirecting...'; msg.style.display='block';
+        setTimeout(()=> navTo('/dashboard'), 600);
+      }catch(err){
+        msg.innerText = 'Error: ' + err.message; msg.style.display='block';
+      }
+    };
+  }
 
-                        <div class="bg-gray-800 p-4 rounded-xl">
-                            <h3 class="text-lg font-semibold text-gray-100 mb-2">Commission Breakdown</h3>
-                            <div class="grid grid-cols-3 gap-4 text-center">
-                                <div class="p-3 bg-gray-700 rounded-lg shadow-sm">
-                                    <span class="text-gray-400 font-medium text-sm">Level 1</span>
-                                    <p class="text-lg font-bold text-yellow-400 mt-1">1000 coins</p>
-                                </div>
-                                <div class="p-3 bg-gray-700 rounded-lg shadow-sm">
-                                    <span class="text-gray-400 font-medium text-sm">Level 2</span>
-                                    <p class="text-lg font-bold text-yellow-400 mt-1">500 coins</p>
-                                </div>
-                                <div class="p-3 bg-gray-700 rounded-lg shadow-sm">
-                                    <span class="text-gray-400 font-medium text-sm">Level 3</span>
-                                    <p class="text-lg font-bold text-yellow-400 mt-1">250 coins</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+  let unsubUserSnapshot = null;
+  function renderDashboard(user){
+    // user is firebase user object
+    $app.innerHTML = `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Welcome back</div>
+            <h2>${user.displayName || user.email}</h2>
+            <div class="small">UID: <span class="muted">${user.uid}</span></div>
+          </div>
+          <div style="text-align:right">
+            <div class="small">Account</div>
+            <div id="signout-wrap"><button class="btn-ghost" id="btn-signout">Sign out</button></div>
+          </div>
+        </div>
+      </div>
 
-                <!-- Contact Us Section -->
-                <section id="contact-section" class="space-y-6 hidden">
-                    <h2 class="text-2xl font-semibold text-gray-100">Contact Us</h2>
-                    <div class="p-6 rounded-lg border border-gray-700 card space-y-4">
-                        <p class="text-center text-gray-400">Have a question or need support? Fill out the form below or contact us on WhatsApp.</p>
-                        <div class="mb-4">
-                            <label for="contact-name" class="block text-sm font-medium text-gray-300">Name</label>
-                            <input type="text" id="contact-name" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div class="mb-4">
-                            <label for="contact-email" class="block text-sm font-medium text-gray-300">Email</label>
-                            <input type="email" id="contact-email" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <div class="mb-4">
-                            <label for="contact-message" class="block text-sm font-medium text-gray-300">Message</label>
-                            <textarea id="contact-message" rows="4" class="mt-1 block w-full rounded-md border-gray-600 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                        </div>
-                        <button id="contact-send-btn" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors button-primary">Send Message</button>
-                        <p class="text-center text-sm mt-4 text-gray-400">Or contact us directly on WhatsApp: <a href="https://wa.me/923326849518" target="_blank" class="text-blue-400 hover:underline">92 3326849518</a></p>
-                    </div>
-                </section>
-            </main>
+      <div class="grid-3">
+        <div class="card">
+          <div class="small">Usable coins</div>
+          <div class="balance" id="coins-usable">0</div>
+        </div>
+        <div class="card">
+          <div class="small">Pending coins</div>
+          <div class="balance" id="coins-pending">0</div>
+        </div>
+        <div class="card">
+          <div class="small">Role</div>
+          <div class="balance" id="user-role">free</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Quick actions</h3>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" id="go-watch">Start Watching (WebTraffic)</button>
+          <button class="btn-ghost" id="go-ref">Referrals</button>
+          <button class="btn" id="go-prem">Get Premium</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recent</h3>
+        <div id="recent-log" class="small muted">No recent events (server-side logs will appear here).</div>
+      </div>
+    `;
+
+    document.getElementById('btn-signout').onclick = async ()=>{
+      await signOut(auth);
+      navTo('/');
+    };
+
+    document.getElementById('go-watch').onclick = ()=> navTo('/web-traffic');
+    document.getElementById('go-ref').onclick = ()=> navTo('/referrals');
+    document.getElementById('go-prem').onclick = ()=> navTo('/premium');
+
+    // subscribe to user doc
+    const userRef = doc(db, 'users', user.uid);
+    if(unsubUserSnapshot) unsubUserSnapshot();
+    unsubUserSnapshot = onSnapshot(userRef, snap => {
+      if(!snap.exists()) return;
+      const data = snap.data();
+      document.getElementById('coins-usable').innerText = (data.coins?.usable||0);
+      document.getElementById('coins-pending').innerText = (data.coins?.pending||0);
+      document.getElementById('user-role').innerText = data.role || 'free';
+    });
+  }
+
+  function renderWebTraffic(user){
+    $app.innerHTML = `
+      <div class="card">
+        <h2>Web Traffic — Watch sites to earn</h2>
+        <div class="small">Enter a site to preview. Start session to begin server-verified watch (server awards coins).</div>
+        <label>Site URL</label>
+        <input id="wt-url" value="https://example.com" />
+        <div style="height:8px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="wt-start">Start session</button>
+          <button class="btn-ghost" id="wt-stop">Stop session</button>
+        </div>
+        <div id="wt-state" class="notice" style="display:none"></div>
+      </div>
+
+      <div class="card">
+        <h3>Preview</h3>
+        <iframe id="wt-iframe" class="iframe-preview" src="about:blank"></iframe>
+      </div>
+    `;
+
+    let sessionId = null;
+    let heartbeatTimer = null;
+    const urlInput = document.getElementById('wt-url');
+    const iframe = document.getElementById('wt-iframe');
+    document.getElementById('wt-start').onclick = async ()=>{
+      const url = urlInput.value.trim();
+      if(!url){ alert('Enter a URL'); return; }
+      iframe.src = url;
+      // call server to create session
+      const payload = { url, uid: user.uid };
+      document.getElementById('wt-state').style.display='block';
+      document.getElementById('wt-state').innerText = 'Requesting session...';
+      const res = await apiFetch('/.netlify/functions/session-start', payload);
+      if(res && res.sessionId){
+        sessionId = res.sessionId;
+        document.getElementById('wt-state').innerText = 'Session started: ' + sessionId;
+        // start heartbeat every 10s
+        heartbeatTimer = setInterval(async ()=>{
+          await apiFetch('/.netlify/functions/session-heartbeat', { sessionId, uid: user.uid });
+          // Note: server will validate and award coins; frontend can't trust itself to award.
+        }, 10000);
+      } else {
+        document.getElementById('wt-state').innerText = 'Failed to start session: ' + (res.error || JSON.stringify(res));
+      }
+    };
+
+    document.getElementById('wt-stop').onclick = async ()=>{
+      if(heartbeatTimer) clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+      if(sessionId){
+        // Ideally call server to finalize session (not implemented here)
+        document.getElementById('wt-state').innerText = 'Session stopped: ' + sessionId;
+        sessionId = null;
+      } else {
+        document.getElementById('wt-state').innerText = 'No active session';
+      }
+    };
+  }
+
+  function renderReferrals(user){
+    const referralLink = location.origin + '/?ref=' + encodeURIComponent(user.uid);
+    $app.innerHTML = `
+      <div class="card">
+        <h2>Referrals</h2>
+        <div class="small">Share the link below. When someone signs up using your link, you'll get commissions (configured server-side).</div>
+        <div style="height:8px"></div>
+        <div class="link-box">${referralLink}</div>
+        <div style="height:12px"></div>
+        <button class="btn" id="copy-ref">Copy link</button>
+        <div style="height:12px"></div>
+        <div class="small">Commission balance (server-tracked): <strong id="ref-comm">0</strong></div>
+        <div style="height:12px"></div>
+        <button class="btn-ghost" id="collect-ref">Collect commissions</button>
+        <div id="ref-msg" class="notice" style="display:none"></div>
+      </div>
+    `;
+    document.getElementById('copy-ref').onclick = ()=> {
+      navigator.clipboard.writeText(referralLink);
+      alert('Referral link copied');
+    };
+    document.getElementById('collect-ref').onclick = async ()=>{
+      // calls serverless to move pending commissions to usable
+      const res = await apiFetch('/.netlify/functions/referral-collect', { uid: user.uid });
+      document.getElementById('ref-msg').style.display='block';
+      if(res && res.ok !== false){
+        document.getElementById('ref-msg').innerText = 'Collect request sent. Check dashboard.';
+      } else {
+        document.getElementById('ref-msg').innerText = 'Error: ' + (res.error || JSON.stringify(res));
+      }
+    };
+
+    // subscribe to user's referral data
+    const userRef = doc(db, 'users', user.uid);
+    if(unsubUserSnapshot) unsubUserSnapshot();
+    unsubUserSnapshot = onSnapshot(userRef, snap => {
+      if(!snap.exists()) return;
+      const data = snap.data();
+      document.getElementById('ref-comm').innerText = (data.referrals?.commission_balance||0);
+    });
+  }
+
+  function renderPremium(user){
+    $app.innerHTML = `
+      <div class="card">
+        <h2>Premium plans</h2>
+        <div class="small">Upgrade to get better earnings and priority features. Payments processed via NOWPayments (server-created invoice).</div>
+        <div style="height:10px"></div>
+        <div style="display:flex;gap:10px">
+          <div style="flex:1" class="card">
+            <div class="small">Weekly</div>
+            <div class="balance">USD $3</div>
+            <div style="height:8px"></div>
+            <button class="btn" id="buy-weekly">Buy Weekly</button>
+          </div>
+          <div style="flex:1" class="card">
+            <div class="small">Monthly</div>
+            <div class="balance">USD $10</div>
+            <div style="height:8px"></div>
+            <button class="btn" id="buy-monthly">Buy Monthly</button>
+          </div>
         </div>
 
-        <!-- Social Media Footer -->
-        <footer class="text-center mt-12 mb-4">
-            <h3 class="text-lg font-semibold text-gray-200 mb-4">Follow Us</h3>
-            <div class="flex justify-center space-x-6">
-                <a href="#" class="social-icon">
-                    <img src="https://placehold.co/40x40/transparent/FFF?text=F" alt="Facebook" class="w-10 h-10">
-                </a>
-                <a href="#" class="social-icon">
-                    <img src="https://placehold.co/40x40/transparent/FFF?text=X" alt="X/Twitter" class="w-10 h-10">
-                </a>
-                <a href="#" class="social-icon">
-                    <img src="https://placehold.co/40x40/transparent/FFF?text=I" alt="Instagram" class="w-10 h-10">
-                </a>
-                <a href="#" class="social-icon">
-                    <img src="https://placehold.co/40x40/transparent/FFF?text=W" alt="WhatsApp" class="w-10 h-10">
-                </a>
-            </div>
-        </footer>
+        <div id="invoice-area" style="margin-top:12px;display:none"></div>
+      </div>
+    `;
 
-        <!-- Modal for General Messages -->
-        <div id="message-modal" class="fixed inset-0 flex items-center justify-center p-4 z-40 hidden">
-            <div class="modal-overlay absolute inset-0 bg-gray-900 bg-opacity-70"></div>
-            <div class="bg-gray-800 rounded-lg p-6 shadow-xl z-50 w-full max-w-sm text-center card border border-gray-700 text-gray-200">
-                <h3 id="modal-title" class="text-xl font-semibold mb-2"></h3>
-                <p id="message-modal-text" class="text-gray-100"></p>
-                <button id="message-modal-close" class="mt-4 px-6 py-2 bg-gray-700 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors">OK</button>
-            </div>
-        </div>
-        
-        <!-- Coin Earned Effect Element -->
-        <div id="coin-earned-effect" class="coin-earned-effect hidden"></div>
+    document.getElementById('buy-weekly').onclick = ()=> createInvoice(user.uid,'weekly');
+    document.getElementById('buy-monthly').onclick = ()=> createInvoice(user.uid,'monthly');
+  }
 
-    </div>
+  async function createInvoice(uid, plan){
+    // Calls Netlify function to create NOWPayments invoice. Netlify function must be deployed.
+    const area = document.getElementById('invoice-area');
+    area.style.display='block';
+    area.innerText = 'Creating invoice...';
+    const res = await apiFetch('/.netlify/functions/create-invoice', { uid, plan });
+    if(res && res.invoice && res.invoice.invoice_url){
+      area.innerHTML = `<div class="small">Invoice created. Pay using the button below. After payment the server webhook will mark your account premium.</div>
+                        <div style="height:8px"></div>
+                        <a class="btn" href="${res.invoice.invoice_url}" target="_blank">Open payment</a>`;
+    } else {
+      area.innerHTML = `<div class="notice">Failed to create invoice: ${JSON.stringify(res)}</div>`;
+    }
+  }
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-            onAuthStateChanged, signOut, sendPasswordResetEmail, sendEmailVerification,
-            signInWithCustomToken, signInAnonymously
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, addDoc, updateDoc, increment, runTransaction, serverTimestamp, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  function renderAdsLaunch(user){
+    $app.innerHTML = `
+      <div class="card">
+        <h2>Launch an Ad Campaign (Advertiser)</h2>
+        <div class="small">This will call serverless to reserve budget and create an ad record (server will deduct coins).</div>
+        <label>Target URL</label><input id="ad-url" placeholder="https://example.com" />
+        <label>Cost per Impression (coins)</label><input id="ad-cost" value="1" type="number" />
+        <label>Budget (total coins)</label><input id="ad-budget" value="100" type="number" />
+        <div style="height:8px"></div>
+        <button class="btn" id="ad-launch">Launch Ad</button>
+        <div id="ad-res" class="notice" style="display:none"></div>
+      </div>
+    `;
 
-        // Set Firebase debug logging
-        setLogLevel('debug');
+    document.getElementById('ad-launch').onclick = async ()=>{
+      const target = document.getElementById('ad-url').value.trim();
+      const cost = Number(document.getElementById('ad-cost').value || 1);
+      const budget = Number(document.getElementById('ad-budget').value || 100);
+      const res = await apiFetch('/.netlify/functions/ad-launch', { uid: user.uid, ownerId: user.uid, targetUrl: target, cost_per_impression: cost, budget_coins: budget });
+      const el = document.getElementById('ad-res');
+      el.style.display='block';
+      if(res && res.ok !== false){
+        el.innerText = 'Ad created. ID: ' + (res.adId || JSON.stringify(res));
+      } else {
+        el.innerText = 'Error: ' + (res.error || JSON.stringify(res));
+      }
+    };
+  }
 
-        // Configuration constants
-        const AD_COSTS = { 'impression': 300, 'direct-link': 500 };
-        const PREMIUM_COSTS = { 'impression': 700, 'direct-link': 900 };
-        const EARNINGS = { 'impression': 300, 'direct-link': 500 };
-        const PREMIUM_EARNINGS = { 'impression': 700, 'direct-link': 900 };
-        const AD_VIEW_DURATION_SECONDS = 15;
-        const AD_COOLDOWN_SECONDS = 120;
-        const INITIAL_COINS = 5000;
-        const COMMISSIONS = {
-            level1: 1000,
-            level2: 500,
-            level3: 250
-        };
-        const ADMIN_IMPRESSION_ADS = [
-            'https://cludymovie.com/',
-            'https://cludycricket.blogspot.com/'
-        ];
-        const ADMIN_DIRECT_ADS = [
-            'https://otieu.com/4/9677163',
-            'https://otieu.com/4/9677167',
-        ];
+  // -------------------------
+  // Router
+  // -------------------------
+  let currentUser = null;
+  function route(){
+    const path = (location.hash || '#/').slice(1);
+    if(!currentUser){
+      // user not logged in
+      if(path === '/signup') return renderSignup();
+      if(path === '/login') return renderLogin();
+      return renderHome();
+    } else {
+      // logged in
+      if(path === '/' || path === '') return renderDashboard(currentUser);
+      if(path === '/dashboard') return renderDashboard(currentUser);
+      if(path === '/web-traffic') return renderWebTraffic(currentUser);
+      if(path === '/referrals') return renderReferrals(currentUser);
+      if(path === '/premium') return renderPremium(currentUser);
+      if(path === '/ads') return renderAdsLaunch(currentUser);
+      // default
+      return renderDashboard(currentUser);
+    }
+  }
 
-        let db, auth;
-        let userId;
-        let lastAdViewed = null;
-        let unsubscribeUser = null;
-        let unsubscribeAds = null;
-        let unsubscribeTransfers = null;
-        let allImpressionsAds = [];
-        let allDirectLinksAds = [];
-        let isWatching = false;
-        let adViewTimeout = null;
-        let countdownInterval = null;
-        let adQueue = [];
-        let lastAdImpressionTime = 0;
-        const impressionCooldown = 5 * 1000;
-        let adTimeLeft = AD_VIEW_DURATION_SECONDS;
-        let isPageActive = true;
-        let isIframeVisible = false;
+  window.addEventListener('hashchange', route);
 
-        // UI elements
-        const viewAdsBtn = document.getElementById('view-ads-btn');
-        const createAdBtn = document.getElementById('create-ad-btn');
-        const upgradePremiumBtn = document.getElementById('upgrade-premium-btn');
-        const coinBalanceDisplay = document.getElementById('coin-balance');
-        const userIdEl = document.getElementById('user-id');
-        const adUrlInput = document.getElementById('ad-url');
-        const adTypeSelect = document.getElementById('ad-type');
-        const adViewsInput = document.getElementById('ad-views');
-        const isPremiumCheckbox = document.getElementById('is-premium');
-        const adCostDisplay = document.getElementById('ad-cost');
-        const createAdSubmitBtn = document.getElementById('create-ad-submit-btn');
-        const startImpressionsBtn = document.getElementById('start-impressions-btn');
-        const adIframe = document.getElementById('ad-iframe');
-        const stopImpressionsBtn = document.getElementById('stop-impressions-btn');
-        const directLinksAdsList = document.getElementById('direct-links-ads-list');
-        const messageModal = document.getElementById('message-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const messageModalText = document.getElementById('message-modal-text');
-        const messageModalClose = document.getElementById('message-modal-close');
-        const coinEarnedEffect = document.getElementById('coin-earned-effect');
-        const countdownDisplay = document.getElementById('countdown-display');
-        const authSection = document.getElementById('auth-section');
-        const mainAppContent = document.getElementById('main-app-content');
-        const loadingScreen = document.getElementById('loading');
-        const appContainer = document.getElementById('app');
-        const premiumAdNotificationEl = document.getElementById('premium-ad-notification');
-        const referralLinkInput = document.getElementById('referral-link-input');
-        const copyLinkBtn = document.getElementById('copy-link-btn');
-        const copySuccessEl = document.getElementById('copy-success');
-        
-        // Transfer section UI elements
-        const transferBalanceEl = document.getElementById('transfer-balance');
-        const transferUserIdEl = document.getElementById('transfer-user-id');
-        const recipientIdInput = document.getElementById('recipient-id');
-        const amountToTransferInput = document.getElementById('amount-to-transfer');
-        const transferSubmitBtn = document.getElementById('transfer-submit-btn');
-        const transferHistoryList = document.getElementById('transfer-history-list');
-
-        // Auth UI elements
-        const loginTab = document.getElementById('login-tab');
-        const signupTab = document.getElementById('signup-tab');
-        const loginView = document.getElementById('login-view');
-        const signupView = document.getElementById('signup-view');
-        const loginEmailInput = document.getElementById('login-email');
-        const loginPasswordInput = document.getElementById('login-password');
-        const loginSubmitBtn = document.getElementById('login-submit-btn');
-        const signupEmailInput = document.getElementById('signup-email');
-        const signupPasswordInput = document.getElementById('signup-password');
-        const signupSubmitBtn = document.getElementById('signup-submit-btn');
-        const forgotPasswordLink = document.getElementById('forgot-password-link');
-        const authMessageEl = document.getElementById('auth-message');
-        const signOutBtn = document.getElementById('sign-out-btn');
-
-        // Utility function to show modal messages
-        const showMessageModal = (title, message) => {
-            modalTitle.textContent = title;
-            messageModalText.textContent = message;
-            messageModal.classList.remove('hidden');
-        };
-        
-        const hideMessageModal = () => {
-            messageModal.classList.add('hidden');
-        };
-
-        // Event listener for the modal close button
-        if (messageModalClose) {
-            messageModalClose.addEventListener('click', hideMessageModal);
+  // -------------------------
+  // Auth listener
+  // -------------------------
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+    setNavLoggedIn(!!user);
+    if(user){
+      // ensure user doc exists
+      try{
+        const ud = await getDoc(doc(db,'users',user.uid));
+        if(!ud.exists()){
+          await setDoc(doc(db,'users',user.uid), {
+            email: user.email,
+            displayName: user.displayName || '',
+            createdAt: serverTimestamp(),
+            role: 'free',
+            coins: { usable: 0, pending: 0 },
+            referrals: { inviterId: null, invitedCount: 0, commission_balance: 0 }
+          });
         }
-
-        const showCoinEffect = (amount) => {
-            coinEarnedEffect.textContent = `+${amount} Coins!`;
-            coinEarnedEffect.classList.remove('hidden');
-            setTimeout(() => {
-                coinEarnedEffect.classList.add('hidden');
-            }, 2000);
-        };
-
-        const showMainContent = () => {
-            authSection.classList.add('hidden');
-            mainAppContent.classList.remove('hidden');
-            showView('dashboard-section');
-        };
-
-        const showAuthScreen = () => {
-            mainAppContent.classList.add('hidden');
-            authSection.classList.remove('hidden');
-        };
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-            // Initialize Firebase services
-            try {
-                const app = initializeApp(firebaseConfig);
-                auth = getAuth(app);
-                db = getFirestore(app);
-
-                // Authentication state listener and data setup
-                onAuthStateChanged(auth, async (user) => {
-                    loadingScreen.classList.add('hidden');
-                    appContainer.classList.remove('hidden');
-                    if (user) {
-                        userId = user.uid;
-                        userIdEl.textContent = userId;
-                        transferUserIdEl.textContent = userId;
-                        await setupFirestoreListeners(appId);
-                        showMainContent();
-                    } else {
-                        // User is signed out
-                        showAuthScreen();
-                        if (initialAuthToken) {
-                            try {
-                                await signInWithCustomToken(auth, initialAuthToken);
-                            } catch (e) {
-                                console.error("Custom token sign-in failed:", e);
-                            }
-                        } else {
-                            // Clear all data if the user is not authenticated
-                            if (unsubscribeUser) unsubscribeUser();
-                            if (unsubscribeAds) unsubscribeAds();
-                            if (unsubscribeTransfers) unsubscribeTransfers();
-                            // Keep the UI in an unauthenticated state
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error("Firebase initialization error:", error);
-                loadingScreen.classList.add('hidden');
-                showMessageModal("Error", "An error occurred during app startup. Please refresh the page. " + error.message);
-            }
-            
-            // Add a new event listener for visibility changes
-            document.addEventListener('visibilitychange', () => {
-                isPageActive = !document.hidden;
-                if (!isPageActive && isWatching) {
-                    pauseAd();
-                    showMessageModal("Ad Paused", "The ad timer has stopped. Return to this tab to resume.");
-                } else if (isPageActive && isWatching && isIframeVisible) {
-                    resumeAd();
-                    hideMessageModal();
-                }
-            });
-
-            // Intersection Observer to check if the iframe is in the viewport
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    isIframeVisible = entry.isIntersecting;
-                    if (isWatching) {
-                        if (isIframeVisible && isPageActive) {
-                            resumeAd();
-                            hideMessageModal();
-                        } else {
-                            pauseAd();
-                            if (!isIframeVisible) {
-                                showMessageModal("Ad Paused", "The ad timer has stopped. Scroll back to the ad to resume.");
-                            }
-                        }
-                    }
-                });
-            });
-            observer.observe(adIframe);
-        });
-
-        const setupFirestoreListeners = async (appId) => {
-             // User data listener (private)
-            const userPrivateDocRef = doc(db, `/artifacts/${appId}/users/${userId}/private/data`);
-            const userPublicDocRef = doc(db, `/artifacts/${appId}/public/data/users`, userId);
-
-            // Check if the public user document exists (new user)
-            const userPublicDocSnap = await getDoc(userPublicDocRef);
-            if (!userPublicDocSnap.exists()) {
-                await handleNewUserReferral(userId);
-            }
-
-            // Set up real-time listener for the user's private data
-            unsubscribeUser = onSnapshot(userPrivateDocRef, async (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    const coins = data.coins || 0;
-                    coinBalanceDisplay.textContent = coins;
-                    transferBalanceEl.textContent = coins;
-                    lastAdViewed = data.lastAdViewed ? data.lastAdViewed.toDate() : null;
-                    referralLinkInput.value = `${window.location.origin}${window.location.pathname}?ref=${userId}`;
-                } else {
-                    // Create initial user data if it doesn't exist
-                    await setDoc(userPrivateDocRef, { coins: INITIAL_COINS, lastAdViewed: null });
-                    coinBalanceDisplay.textContent = INITIAL_COINS;
-                    transferBalanceEl.textContent = INITIAL_COINS;
-                }
-            }, (error) => {
-                console.error("Error fetching user data:", error);
-            });
-
-            // Ad data listener (public)
-            const adsColRef = collection(db, `/artifacts/${appId}/public/data/ads`);
-
-            // Seed admin ads if they don't exist
-            const adminAdsQuery = query(adsColRef, where("isAdminAd", "==", true));
-            const adminAdsSnap = await getDocs(adminAdsQuery);
-            if (adminAdsSnap.empty) {
-                console.log("Seeding admin ads...");
-                try {
-                    await runTransaction(db, async (t) => {
-                        ADMIN_IMPRESSION_ADS.forEach(url => {
-                            const newDocRef = doc(collection(db, `/artifacts/${appId}/public/data/ads`));
-                            t.set(newDocRef, {
-                                url,
-                                type: 'impression',
-                                impressionsRemaining: 999999,
-                                postedBy: 'admin',
-                                isAdminAd: true,
-                                isPremium: true,
-                                createdAt: serverTimestamp()
-                            });
-                        });
-                        ADMIN_DIRECT_ADS.forEach(url => {
-                            const newDocRef = doc(collection(db, `/artifacts/${appId}/public/data/ads`));
-                            t.set(newDocRef, {
-                                url,
-                                type: 'direct-link',
-                                impressionsRemaining: 999999,
-                                postedBy: 'admin',
-                                isAdminAd: true,
-                                isPremium: true,
-                                createdAt: serverTimestamp()
-                            });
-                        });
-                    });
-                    console.log("Admin ads seeded successfully.");
-                } catch (e) {
-                    console.error("Failed to seed admin ads: ", e);
-                }
-            }
-
-            // Listen for ad changes
-            unsubscribeAds = onSnapshot(adsColRef, (querySnapshot) => {
-                allImpressionsAds = [];
-                allDirectLinksAds = [];
-
-                querySnapshot.forEach((doc) => {
-                    const ad = { id: doc.id, ...doc.data() };
-                    if (ad.impressionsRemaining > 0) {
-                        if (ad.type === 'impression') {
-                            allImpressionsAds.push(ad);
-                        } else if (ad.type === 'direct-link') {
-                            allDirectLinksAds.push(ad);
-                        }
-                    }
-                });
-                renderAllDirectLinks();
-                // We'll queue all impression ads when the button is clicked, no need to render them here.
-            }, (error) => {
-                console.error("Error fetching ad data:", error);
-            });
-
-            // Set up real-time listener for transfers
-            const transfersColRef = collection(db, `/artifacts/${appId}/public/data/transactions`);
-            unsubscribeTransfers = onSnapshot(transfersColRef, (querySnapshot) => {
-                const transfers = [];
-                querySnapshot.forEach((doc) => {
-                    const transfer = { id: doc.id, ...doc.data() };
-                    transfers.push(transfer);
-                });
-                renderTransferHistory(transfers);
-            }, (error) => {
-                console.error("Error fetching transfer history:", error);
-            });
-        };
-
-        // --- Core Referral Logic (Client-Side) ---
-        // WARNING: This logic is NOT SECURE. It is entirely client-side and can be manipulated by users.
-        // For a production application, this functionality MUST be moved to a secure, server-side
-        // environment like a Firebase Cloud Function.
-        const handleNewUserReferral = async (newUserUid) => {
-            const params = new URLSearchParams(window.location.search);
-            const referrerId = params.get('ref');
-
-            // Fix: Define the document references here to make them accessible
-            // throughout the function's scope.
-            const userPrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${newUserUid}/private/data`);
-            const userPublicDocRef = doc(db, `/artifacts/${__app_id}/public/data/users`, newUserUid);
-
-
-            const newUserData = {
-                upline: {
-                    level1: referrerId,
-                    level2: null,
-                    level3: null,
-                },
-                referralCoins: 0,
-                createdAt: new Date().toISOString()
-            };
-            
-            // Check if there is a referrer
-            if (referrerId && referrerId !== newUserUid) {
-                try {
-                    await runTransaction(db, async (t) => {
-                        // User's private coin balance to be updated
-                        const newUserPrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${newUserUid}/private/data`);
-
-                        // Find the upline for the new user
-                        const referrerDocRef = doc(db, `/artifacts/${__app_id}/public/data/users`, referrerId);
-                        const referrerDoc = await t.get(referrerDocRef);
-
-                        // Only proceed if the referrer exists
-                        if (referrerDoc.exists()) {
-                            const referrerData = referrerDoc.data();
-                            const referrerLevel2 = referrerData.upline?.level1;
-                            const referrerLevel3 = referrerData.upline?.level2;
-
-                            // Update the new user's upline data
-                            if (referrerLevel2) {
-                                newUserData.upline.level2 = referrerLevel2;
-                            }
-                            if (referrerLevel3) {
-                                newUserData.upline.level3 = referrerLevel3;
-                            }
-
-                            // Award Level 1 commission to the direct referrer
-                            const referrerPrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${referrerId}/private/data`);
-                            t.update(referrerPrivateDocRef, { coins: increment(COMMISSIONS.level1) });
-                            console.log(`Awarded ${COMMISSIONS.level1} coins to Level 1 referrer: ${referrerId}`);
-
-                            // Award Level 2 commission
-                            if (referrerLevel2) {
-                                const level2PrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${referrerLevel2}/private/data`);
-                                t.update(level2PrivateDocRef, { coins: increment(COMMISSIONS.level2) });
-                                console.log(`Awarded ${COMMISSIONS.level2} coins to Level 2 referrer: ${referrerLevel2}`);
-                            }
-
-                            // Award Level 3 commission
-                            if (referrerLevel3) {
-                                const level3PrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${referrerLevel3}/private/data`);
-                                t.update(level3PrivateDocRef, { coins: increment(COMMISSIONS.level3) });
-                                console.log(`Awarded ${COMMISSIONS.level3} coins to Level 3 referrer: ${referrerLevel3}`);
-                            }
-                        }
-                        
-                        // Create the new user's private and public documents
-                        t.set(newUserPrivateDocRef, { coins: INITIAL_COINS, lastAdViewed: null, referralCoins: 0 });
-                        t.set(userPublicDocRef, newUserData);
-
-                    });
-                } catch (error) {
-                    console.error("Referral transaction failed: ", error);
-                    // If the transaction fails, we still need to create the new user's documents
-                    await setDoc(userPrivateDocRef, { coins: INITIAL_COINS, lastAdViewed: null });
-                    await setDoc(userPublicDocRef, newUserData);
-                }
-            } else {
-                // No referrer, just create the user's documents
-                await setDoc(userPrivateDocRef, { coins: INITIAL_COINS, lastAdViewed: null });
-                await setDoc(userPublicDocRef, newUserData);
-            }
-        };
-
-        // --- AUTHENTICATION LOGIC ---
-        const handleLogin = async () => {
-            const email = loginEmailInput.value;
-            const password = loginPasswordInput.value;
-            authMessageEl.textContent = '';
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                // The onAuthStateChanged listener will handle the UI
-            } catch (error) {
-                authMessageEl.textContent = `Login failed: ${error.message}`;
-            }
-        };
-
-        const handleSignup = async () => {
-            const email = signupEmailInput.value;
-            const password = signupPasswordInput.value;
-            authMessageEl.textContent = '';
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                await sendEmailVerification(userCredential.user);
-                authMessageEl.textContent = 'Account created! Please check your email to verify your account.';
-                signupEmailInput.value = '';
-                signupPasswordInput.value = '';
-            } catch (error) {
-                authMessageEl.textContent = `Sign up failed: ${error.message}`;
-            }
-        };
-        
-        const handleForgotPassword = async () => {
-            const email = loginEmailInput.value;
-            if (email) {
-                try {
-                    await sendPasswordResetEmail(auth, email);
-                    showMessageModal("Password Reset", `A password reset link has been sent to ${email}.`);
-                } catch (error) {
-                    showMessageModal("Error", `Failed to send password reset email: ${error.message}`);
-                }
-            } else {
-                showMessageModal("Forgot Password", "Please enter your email address in the login field first.");
-            }
-        };
-
-        const handleSignOut = async () => {
-            try {
-                await signOut(auth);
-                // onAuthStateChanged will handle the UI update
-            } catch (error) {
-                console.error("Sign out failed:", error);
-            }
-        };
-
-        // Ad creation logic
-        const handleCreateAd = async () => {
-            const adType = adTypeSelect.value;
-            const adViews = parseInt(adViewsInput.value);
-            const adUrl = adUrlInput.value;
-            const isPremium = isPremiumCheckbox.checked;
-
-            const cost = adViews * (isPremium ? PREMIUM_COSTS[adType] : AD_COSTS[adType]);
-            
-            if (adUrl && adUrl.startsWith('http')) {
-                const userDocRef = doc(db, `/artifacts/${__app_id}/users/${userId}/private/data`);
-                
-                // IMPORTANT: This logic is happening client-side and can be manipulated.
-                try {
-                    await runTransaction(db, async (t) => {
-                        const userDocSnap = await t.get(userDocRef);
-                        const currentCoins = userDocSnap.data().coins;
-                        if (currentCoins < cost) {
-                            showMessageModal("Not enough coins", "Not enough coins to create this ad.");
-                            throw new Error("Not enough coins");
-                        }
-
-                        // Deduct coins from user
-                        t.update(userDocRef, { coins: increment(-cost) });
-
-                        // Add the new ad to the public collection
-                        const newAdRef = doc(collection(db, `/artifacts/${__app_id}/public/data/ads`));
-                        t.set(newAdRef, {
-                            url: adUrl,
-                            type: adType,
-                            impressionsRemaining: adViews,
-                            postedBy: userId,
-                            isAdminAd: false,
-                            isPremium: isPremium,
-                            createdAt: serverTimestamp()
-                        });
-                    });
-                    showMessageModal("Success!", "Ad created successfully!");
-                    adViewsInput.value = '1';
-                    adUrlInput.value = '';
-                    isPremiumCheckbox.checked = false;
-                    updateAdCost();
-                } catch (e) {
-                    console.error("Ad creation failed: ", e);
-                    if (e.message !== "Not enough coins") {
-                        showMessageModal("Error", "Failed to create ad. Please try again.");
-                    }
-                }
-            } else {
-                showMessageModal("Invalid URL", "Please enter a valid website URL starting with http:// or https://");
-            }
-        };
-
-        // Earning section logic
-        
-        // Starts the automated ad viewing loop
-        const startAdLoop = (adList) => {
-            if (isWatching) return;
-            
-            const now = Date.now();
-            if (now - lastAdImpressionTime < impressionCooldown) {
-                showMessageModal("Please Wait", `Please wait ${Math.ceil((impressionCooldown - (now - lastAdImpressionTime)) / 1000)} seconds before starting again.`);
-                return;
-            }
-
-            if (adList.length === 0) {
-                showMessageModal("No Ads", "No ads available right now. Please check back later.");
-                return;
-            }
-
-            isWatching = true;
-            adQueue = [...adList];
-            adQueue.sort(() => Math.random() - 0.5); // Shuffle the queue
-
-            startImpressionsBtn.classList.add('hidden');
-            stopImpressionsBtn.classList.remove('hidden');
-            adIframe.classList.remove('hidden');
-            countdownDisplay.classList.remove('hidden');
-            lastAdImpressionTime = now;
-            adTimeLeft = AD_VIEW_DURATION_SECONDS; // Reset time for a new ad
-
-            // Start the loading process for the first ad
-            startNextAd();
-        };
-
-        // Stops the automated ad viewing loop
-        const stopAdLoop = () => {
-            if (!isWatching) return;
-
-            clearTimeout(adViewTimeout);
-            clearInterval(countdownInterval);
-            isWatching = false;
-            adIframe.classList.add('hidden');
-            countdownDisplay.classList.add('hidden');
-            startImpressionsBtn.classList.remove('hidden');
-            stopImpressionsBtn.classList.add('hidden');
-            adIframe.src = 'about:blank';
-            adQueue = []; // Clear the queue
-            premiumAdNotificationEl.classList.add('hidden');
-            showMessageModal("Stopped", "Ad viewing stopped.");
-        };
-
-        const updateCountdownDisplay = () => {
-            if (isPageActive && isIframeVisible) {
-                countdownDisplay.textContent = `Watching ad... ${adTimeLeft} seconds remaining`;
-            } else {
-                countdownDisplay.textContent = `Timer paused... ${adTimeLeft} seconds remaining`;
-            }
-        };
-
-        const startCountdown = () => {
-            clearInterval(countdownInterval);
-            countdownInterval = setInterval(() => {
-                if (isPageActive && isIframeVisible && adTimeLeft > 0) {
-                    adTimeLeft--;
-                }
-                updateCountdownDisplay();
-                if (adTimeLeft <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
-        };
-
-        const pauseAd = () => {
-            clearTimeout(adViewTimeout);
-            clearInterval(countdownInterval);
-            updateCountdownDisplay();
-        };
-
-        const resumeAd = () => {
-            if (isPageActive && isIframeVisible) {
-                startCountdown();
-                // Set a new timeout with the remaining time
-                adViewTimeout = setTimeout(completeAd, adTimeLeft * 1000);
-            }
-        };
-
-
-        const completeAd = async () => {
-            const currentAd = adQueue.shift();
-            const reward = currentAd.isPremium ? PREMIUM_EARNINGS['impression'] : EARNINGS['impression'];
-            try {
-                await runTransaction(db, async (t) => {
-                    const userRef = doc(db, `/artifacts/${__app_id}/users/${userId}/private/data`);
-                    const adRef = doc(db, `/artifacts/${__app_id}/public/data/ads/${currentAd.id}`);
-                    
-                    // Increment user coins
-                    t.update(userRef, { coins: increment(reward) });
-                    t.update(adRef, { impressionsRemaining: increment(-1) });
-                });
-                showCoinEffect(reward);
-                // Proceed to the next ad
-                startNextAd();
-            } catch (e) {
-                console.error("Ad processing failed: ", e);
-                showMessageModal("Error", "Ad processing failed. Stopping loop.");
-                stopAdLoop();
-            }
-        };
-
-        // Processes a single ad and moves to the next
-        const startNextAd = () => {
-            if (!isWatching) {
-                 // Stop the loop if the user has manually stopped it
-                return;
-            }
-            if (adQueue.length === 0) {
-                 // Restart the loop if ads are available, otherwise show message and stop
-                if (allImpressionsAds.length > 0) {
-                    adQueue = [...allImpressionsAds];
-                    adQueue.sort(() => Math.random() - 0.5);
-                    showMessageModal("Cycling", "Cycling back through ads!");
-                } else {
-                    stopAdLoop();
-                    showMessageModal("No Ads", "All available ads have been viewed! Check back later for more.");
-                    return;
-                }
-            }
-
-            const currentAd = adQueue[0];
-            adTimeLeft = AD_VIEW_DURATION_SECONDS; // Reset time for a new ad
-            
-            // Show or hide the premium notification
-            if (currentAd.isPremium) {
-                premiumAdNotificationEl.classList.remove('hidden');
-            } else {
-                premiumAdNotificationEl.classList.add('hidden');
-            }
-
-            adIframe.src = currentAd.url;
-            
-            // Initial check and start the ad countdown
-            if (isPageActive && isIframeVisible) {
-                resumeAd();
-            } else {
-                pauseAd();
-            }
-        };
-
-        const renderAllDirectLinks = () => {
-            directLinksAdsList.innerHTML = '';
-            // Sort by premium first
-            const sortedAds = [...allDirectLinksAds].sort((a, b) => b.isPremium - a.isPremium);
-
-            sortedAds.forEach(ad => {
-                const reward = ad.isPremium ? PREMIUM_EARNINGS['direct-link'] : EARNINGS['direct-link'];
-                const adCard = document.createElement('div');
-                adCard.className = 'p-6 rounded-lg border border-gray-700 card space-y-4 flex flex-col md:flex-row md:items-center justify-between';
-                adCard.innerHTML = `
-                    <div class="flex-1">
-                        <div class="flex items-center mb-2">
-                            <span class="text-sm text-gray-400">Ad Type: </span>
-                            <span class="text-lg font-semibold text-gray-100 ml-1">${ad.isPremium ? 'Premium Direct Link' : 'Regular Direct Link'}</span>
-                            ${ad.isPremium ? '<span class="premium-ad-indicator ml-2">PREMIUM</span>' : ''}
-                        </div>
-                        <p class="text-xs text-gray-500 break-all">${ad.url}</p>
-                    </div>
-                    <button data-id="${ad.id}" class="earn-direct-link-btn mt-4 md:mt-0 py-2 px-4 bg-yellow-600 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-700 transition-colors button-primary">
-                        Visit & Earn ${reward} Coins
-                    </button>
-                `;
-                directLinksAdsList.appendChild(adCard);
-            });
-            addDirectLinkListeners();
-        };
-
-        const addDirectLinkListeners = () => {
-             document.querySelectorAll('.earn-direct-link-btn').forEach(button => {
-                button.addEventListener('click', async () => {
-                    const now = new Date();
-                    const cooldownPeriod = AD_COOLDOWN_SECONDS * 1000;
-                    if (lastAdViewed && (now - lastAdViewed) < cooldownPeriod) {
-                        const remainingTime = Math.ceil((cooldownPeriod - (now - lastAdViewed)) / 1000);
-                        showMessageModal("Please Wait", `Please wait ${remainingTime} seconds before clicking another link.`);
-                        return;
-                    }
-
-                    const adId = button.dataset.id;
-                    const ad = allDirectLinksAds.find(a => a.id === adId);
-                    
-                    if (!ad) {
-                        showMessageModal("Not Found", "Ad not found or already viewed.");
-                        return;
-                    }
-
-                    window.open(ad.url, '_blank');
-                    const reward = ad.isPremium ? PREMIUM_EARNINGS['direct-link'] : EARNINGS['direct-link'];
-
-                    try {
-                        await runTransaction(db, async (t) => {
-                            const userRef = doc(db, `/artifacts/${__app_id}/users/${userId}/private/data`);
-                            const adRef = doc(db, `/artifacts/${__app_id}/public/data/ads/${adId}`);
-                            
-                            const adSnap = await t.get(adRef);
-                            if (adSnap.data().impressionsRemaining <= 0) {
-                                throw new Error("No impressions remaining");
-                            }
-
-                            t.update(userRef, {
-                                coins: increment(reward),
-                                lastAdViewed: serverTimestamp()
-                            });
-                            t.update(adRef, { impressionsRemaining: increment(-1) });
-                        });
-                        showCoinEffect(reward);
-                    } catch (e) {
-                        console.error("Failed to update data after ad click:", e);
-                        showMessageModal("Error", "Failed to earn coins. Please try again.");
-                    }
-                });
-            });
-        };
-
-        // --- Coin Transfer Logic ---
-        const handleTransfer = async () => {
-            const recipientId = recipientIdInput.value.trim();
-            const amount = parseInt(amountToTransferInput.value);
-            
-            // Validation
-            if (!recipientId) {
-                showMessageModal("Error", "Recipient User ID cannot be empty.");
-                return;
-            }
-            if (recipientId === userId) {
-                showMessageModal("Error", "You cannot transfer coins to yourself.");
-                return;
-            }
-            if (isNaN(amount) || amount <= 0) {
-                showMessageModal("Error", "Please enter a valid amount greater than 0.");
-                return;
-            }
-            
-            // Disable button and show loading state
-            transferSubmitBtn.disabled = true;
-            transferSubmitBtn.textContent = 'Transferring...';
-
-            const userPrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${userId}/private/data`);
-            const recipientPrivateDocRef = doc(db, `/artifacts/${__app_id}/users/${recipientId}/private/data`);
-            const transactionsCollectionRef = collection(db, `/artifacts/${__app_id}/public/data/transactions`);
-
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const senderDoc = await transaction.get(userPrivateDocRef);
-                    const recipientDoc = await transaction.get(recipientPrivateDocRef);
-
-                    if (!senderDoc.exists() || senderDoc.data().coins < amount) {
-                        throw new Error("Insufficient balance.");
-                    }
-                    if (!recipientDoc.exists()) {
-                        throw new Error("Recipient account does not exist.");
-                    }
-
-                    // Perform the updates
-                    transaction.update(userPrivateDocRef, { coins: increment(-amount) });
-                    transaction.update(recipientPrivateDocRef, { coins: increment(amount) });
-                    
-                    // Log the transaction
-                    transaction.set(doc(transactionsCollectionRef), {
-                        senderId: userId,
-                        recipientId: recipientId,
-                        amount: amount,
-                        timestamp: serverTimestamp(),
-                    });
-                });
-
-                showMessageModal("Success", `Successfully transferred ${amount} coins to ${recipientId.substring(0, 8)}...`);
-                recipientIdInput.value = '';
-                amountToTransferInput.value = '1';
-
-            } catch (e) {
-                console.error("Transfer transaction failed:", e);
-                showMessageModal("Transfer Failed", e.message);
-            } finally {
-                transferSubmitBtn.disabled = false;
-                transferSubmitBtn.textContent = 'Transfer Coins';
-            }
-        };
-
-        const renderTransferHistory = (transfers) => {
-            transferHistoryList.innerHTML = '';
-            // Filter and sort transfers relevant to the current user
-            const userTransfers = transfers
-                .filter(t => t.senderId === userId || t.recipientId === userId)
-                .sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
-            if (userTransfers.length === 0) {
-                transferHistoryList.innerHTML = `<p class="text-center text-gray-400">No transfers yet.</p>`;
-                return;
-            }
-
-            userTransfers.forEach(transfer => {
-                const isSent = transfer.senderId === userId;
-                const otherUser = isSent ? transfer.recipientId : transfer.senderId;
-                const amount = isSent ? `- ${transfer.amount}` : `+ ${transfer.amount}`;
-                const className = isSent ? 'sent' : 'received';
-                const date = transfer.timestamp ? new Date(transfer.timestamp.seconds * 1000).toLocaleString() : 'N/A';
-
-                const transferItem = document.createElement('div');
-                transferItem.className = `transfer-history-item ${className}`;
-                transferItem.innerHTML = `
-                    <div>
-                        <p class="font-semibold text-gray-100">${isSent ? 'Sent to' : 'Received from'} <span class="text-gray-400 font-mono">${otherUser.substring(0, 8)}...</span></p>
-                        <p class="text-xs text-gray-500 mt-1">${date}</p>
-                    </div>
-                    <p class="text-xl font-bold ${isSent ? 'text-red-400' : 'text-green-400'}">${amount}</p>
-                `;
-                transferHistoryList.appendChild(transferItem);
-            });
-        };
-
-        // Navigation and UI state management
-        const allSections = document.querySelectorAll('main section');
-        const allNavLinks = document.querySelectorAll('.nav-link');
-        const allTabButtons = document.querySelectorAll('.tab-button');
-        const impressionsView = document.getElementById('impressions-view');
-        const directLinksView = document.getElementById('direct-links-view');
-
-        const showView = (viewId) => {
-            allSections.forEach(section => {
-                section.classList.add('hidden');
-            });
-            document.getElementById(viewId).classList.remove('hidden');
-            // Hide the premium notification whenever a view changes
-            premiumAdNotificationEl.classList.add('hidden');
-            // Stop ad loop if the user navigates away from the earning section
-            if (viewId !== 'earning-section' && isWatching) {
-                stopAdLoop();
-            }
-
-            allNavLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.dataset.view === viewId) {
-                    link.classList.add('active');
-                }
-            });
-        };
-
-        const updateAdCost = () => {
-            const adType = adTypeSelect.value;
-            const views = parseInt(adViewsInput.value) || 0;
-            const isPremium = isPremiumCheckbox.checked;
-            const cost = views * (isPremium ? PREMIUM_COSTS[adType] : AD_COSTS[adType]);
-            adCostDisplay.textContent = cost;
-        };
-
-        // Event listeners
-        allNavLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                const viewId = e.target.dataset.view;
-                showView(viewId);
-            });
-        });
-
-        allTabButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                allTabButtons.forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                if (e.target.id === 'impressions-tab') {
-                    impressionsView.classList.remove('hidden');
-                    directLinksView.classList.add('hidden');
-                } else if (e.target.id === 'direct-links-tab') {
-                    impressionsView.classList.add('hidden');
-                    directLinksView.classList.remove('hidden');
-                } else if (e.target.id === 'login-tab') {
-                    loginView.classList.remove('hidden');
-                    signupView.classList.add('hidden');
-                } else if (e.target.id === 'signup-tab') {
-                    loginView.classList.add('hidden');
-                    signupView.classList.remove('hidden');
-                }
-                authMessageEl.textContent = '';
-            });
-        });
-
-        // Add listeners for the main dashboard buttons
-        viewAdsBtn.addEventListener('click', () => {
-            showView('earning-section');
-        });
-        createAdBtn.addEventListener('click', () => showView('ads-section'));
-        upgradePremiumBtn.addEventListener('click', () => showView('ads-section'));
-
-        // Auth listeners
-        loginSubmitBtn.addEventListener('click', handleLogin);
-        signupSubmitBtn.addEventListener('click', handleSignup);
-        forgotPasswordLink.addEventListener('click', handleForgotPassword);
-        signOutBtn.addEventListener('click', handleSignOut);
-        
-        // Earning listeners
-        startImpressionsBtn.addEventListener('click', () => startAdLoop(allImpressionsAds));
-        stopImpressionsBtn.addEventListener('click', stopAdLoop);
-        
-        // Listen for changes in ad creation form to update cost
-        adTypeSelect.addEventListener('change', updateAdCost);
-        adViewsInput.addEventListener('input', updateAdCost);
-        isPremiumCheckbox.addEventListener('change', updateAdCost);
-        createAdSubmitBtn.addEventListener('click', handleCreateAd);
-
-        // Transfer listeners
-        transferSubmitBtn.addEventListener('click', handleTransfer);
-
-        // Referral system listeners
-        copyLinkBtn.addEventListener('click', () => {
-            referralLinkInput.select();
-            document.execCommand('copy');
-            copySuccessEl.classList.remove('hidden');
-            setTimeout(() => {
-                copySuccessEl.classList.add('hidden');
-            }, 2000);
-        });
-
-        // Contact form listener (placeholder, no actual backend)
-        document.getElementById('contact-send-btn').addEventListener('click', () => {
-            const name = document.getElementById('contact-name').value;
-            const email = document.getElementById('contact-email').value;
-            const message = document.getElementById('contact-message').value;
-
-            if (name && email && message) {
-                showMessageModal("Sent!", "Your message has been sent! We will get back to you shortly.");
-                document.getElementById('contact-name').value = '';
-                document.getElementById('contact-email').value = '';
-                document.getElementById('contact-message').value = '';
-            } else {
-                showMessageModal("Missing Info", "Please fill out all the fields.");
-            }
-        });
-        
-        // This is a placeholder section with no functional logic, as this requires a secure backend.
-        // I have removed the functionality and left the HTML for design purposes.
-        document.getElementById('upgrade-premium-btn').addEventListener('click', () => showMessageModal("Unavailable", "This feature is not implemented for security reasons, as it requires a secure backend payment system."));
-
-        // Background shooting stars
-        const createShootingStar = () => {
-            const star = document.createElement('div');
-            star.className = 'shooting-star absolute';
-            const size = Math.random() * 2 + 1;
-            const left = Math.random() * 100;
-            const top = Math.random() * 100;
-            star.style.width = `${size * 50}px`;
-            star.style.height = `${size}px`;
-            star.style.left = `${left}vw`;
-            star.style.top = `${top}vh`;
-            const duration = Math.random() * 3 + 2;
-            star.style.animationDuration = `${duration}s`;
-            document.getElementById('shooting-star-container').appendChild(star);
-            setTimeout(() => star.remove(), duration * 1000);
-        };
-        const shootingStarContainer = document.getElementById('shooting-star-container');
-        if (shootingStarContainer) {
-            shootingStarContainer.classList.remove('hidden');
-            setInterval(createShootingStar, 5000);
+      }catch(e){
+        console.warn('Error ensuring user doc', e);
+      }
+    } else {
+      // logged out: unsubscribe if existed
+      if(unsubUserSnapshot) { unsubUserSnapshot(); unsubUserSnapshot = null; }
+    }
+    route();
+  });
+
+  // initial route render
+  route();
+
+  // Utility: If landing has ?ref=... param (user arrived with referral), store in localStorage so when they sign up we can attach inviterId server-side.
+  (function handleReferralParam(){
+    const params = new URLSearchParams(location.search);
+    const ref = params.get('ref');
+    if(ref){
+      localStorage.setItem('markcoin_referrer', ref);
+      // keep the url clean
+      history.replaceState({}, '', location.pathname);
+    }
+  })();
+
+  // On new account creation, server-side should read localStorage ref via client and attach to user doc.
+  // Below: helper that runs on signup page to auto-fill inviterId into user doc if present.
+  async function attachInviterIfExists(uid){
+    const ref = localStorage.getItem('markcoin_referrer');
+    if(!ref) return;
+    try{
+      await updateDoc(doc(db,'users',uid), { 'referrals.inviterId': ref } );
+      // Optionally notify server (via function) to credit inviter partially; server must handle final commission awarding.
+      // Example:
+      // await apiFetch('/.netlify/functions/register-referral', {uid, inviterId: ref});
+    }catch(e){
+      console.warn('attachInviter failed', e);
+    }
+  }
+
+  // Hook: after createUserWithEmailAndPassword in Signup view, call attachInviterIfExists( uid ).
+  // Because the signup flow above creates the doc and then navigates, we can also call it here by observation:
+  // We'll listen for new onAuth and attempt to attach if doc exists but no inviterId set.
+  onAuthStateChanged(auth, async (u) => {
+    if(!u) return;
+    try{
+      const ud = await getDoc(doc(db,'users',u.uid));
+      if(ud.exists()){
+        const data = ud.data();
+        if(!data.referrals?.inviterId){
+          await attachInviterIfExists(u.uid);
         }
-    </script>
+      }
+    }catch(e){
+      console.warn('post-auth attachInviter error', e);
+    }
+  });
+
+  // Expose some helpers for debugging in console
+  window.MARKCOIN = { auth, db, apiFetch };
+  </script>
 </body>
 </html>
