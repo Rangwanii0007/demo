@@ -71,18 +71,16 @@
   import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
   import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-  // -------------------------
-  // PASTE YOUR FIREBASE CONFIG BELOW
-  // -------------------------
-  // Example:
-  // const FIREBASE_CONFIG = {
-  //   apiKey: "REPLACE",
-  //   authDomain: "REPLACE",
-  //   projectId: "REPLACE",
-  //   storageBucket: "REPLACE",
-  //   messagingSenderId: "REPLACE",
-  //   appId: "REPLACE"
-  // }
+  
+   const firebaseConfig = {
+  apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
+  authDomain: "ad-4-u.firebaseapp.com",
+  projectId: "ad-4-u",
+  storageBucket: "ad-4-u.firebasestorage.app",
+  messagingSenderId: "775864010731",
+  appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
+  measurementId: "G-3R9DDSM2XK"
+};
   const FIREBASE_CONFIG = {
     // >>>>>--- PASTE YOUR FIREBASE CONFIG OBJECT HERE ---<<<<<
     // You said Firebase details are already in your conversation. Paste them here.
