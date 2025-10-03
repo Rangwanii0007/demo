@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Admin Panel - MARK COIN</title>
+  <style>
+    body{margin:0;background:#071124;color:#e6eef6;font-family:Arial,Helvetica,sans-serif;}
+    .card{background:#0b1220;padding:14px;border-radius:10px;margin:14px;}
+    .btn{background:#06b6d4;color:#042027;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    input{padding:8px;border-radius:6px;border:none;width:100%;margin:6px 0}
+    .muted{color:#94a3b8}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Admin Panel</h2>
+    <label>Search User by UID</label>
+    <input id="uid" placeholder="Enter UID...">
+    <button class="btn" id="search">Search</button>
+  </div>
+  <div id="result"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore,doc,getDoc,updateDoc,serverTimestamp,Timestamp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
+      authDomain: "ad-4-u.firebaseapp.com",
+      projectId: "ad-4-u",
+      storageBucket: "ad-4-u.firebasestorage.app",
+      messagingSenderId: "775864010731",
+      appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
+      measurementId: "G-3R9DDSM2XK"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    document.getElementById("search").onclick = async ()=>{
+      const uid=document.getElementById("uid").value.trim();
+      if(!uid) return alert("Enter UID");
+      const ref=doc(db,"users",uid);
+      const snap=await getDoc(ref);
+      if(!snap.exists()){ document.getElementById("result").innerHTML="<div class='card'>User not found</div>"; return; }
+      const data=snap.data();
+      document.getElementById("result").innerHTML=`
+        <div class="card">
+          <p>Email: ${data.email}</p>
+          <p>Role: ${data.role}</p>
+          <p>Coins: ${data.coins?.usable||0}</p>
+          <button class="btn" id="p7">Make Premium 7 Days</button>
+          <button class="btn" id="p30">Make Premium 30 Days</button>
+          <button class="btn" id="free">Downgrade to Free</button>
+        </div>
+      `;
+      document.getElementById("p7").onclick=()=>makePremium(uid,7);
+      document.getElementById("p30").onclick=()=>makePremium(uid,30);
+      document.getElementById("free").onclick=()=>updateDoc(ref,{role:"free",premiumExpiresAt:null});
+    };
+
+    async function makePremium(uid,days){
+      const ref=doc(db,"users",uid);
+      const expire=new Date();
+      expire.setDate(expire.getDate()+days);
+      await updateDoc(ref,{
+        role:"premium",
+        premiumExpiresAt:Timestamp.fromDate(expire)
+      });
+      alert("User upgraded for "+days+" days.");
+    }
+  </script>
+</body>
+</html>
