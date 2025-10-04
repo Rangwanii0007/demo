@@ -1,901 +1,194 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ad-4-U — Earn & Advertise</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Ad4U Platform</title>
   <style>
-    :root{
-      --bg:#071124; --panel:#0b1220; --muted:#93a6b8; --accent:#06b6d4; --accent2:#0891b2; --glass:rgba(255,255,255,0.02);
-      --card:#0f1724;
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      margin: 0; padding: 0;
     }
-    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,Arial}
-    body{margin:0;background:linear-gradient(180deg,#010412,#071124);color:#eaf2f8;min-height:100vh}
-    header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);position:sticky;top:0;z-index:60}
-    .brand{font-weight:800;color:var(--accent);font-size:20px}
-    nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    nav a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:10px;font-weight:600}
-    nav a.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#021823;box-shadow:0 10px 30px rgba(6,182,212,0.06)}
-    .btn{background:var(--accent);color:#021823;padding:8px 12px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 12px;border-radius:10px;cursor:pointer}
-    .container{max-width:1180px;margin:20px auto;padding:12px}
-    .row{display:flex;gap:16px}
-    .col{flex:1}
-    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:14px;margin-bottom:14px;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
-    .small{font-size:13px;color:var(--muted)}
-    .balance{font-size:26px;font-weight:800}
-    .input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
-    .iframe{width:100%;height:420px;border-radius:12px;border:0;box-shadow:0 10px 40px rgba(6,182,212,0.04)}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--glass);color:var(--muted);font-weight:700}
-    .table{width:100%;border-collapse:collapse}
-    .table td,.table th{padding:10px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
-    .notice{background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;color:var(--muted)}
-    .link-box{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;word-break:break-all}
-    .overlay-fallback{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(2,8,12,0.6);border-radius:12px}
-    @media(max-width:980px){.row{flex-direction:column}.iframe{height:260px}nav{overflow:auto}}
+    header {
+      background: #222;
+      color: white;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 10px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a:hover { text-decoration: underline; }
+    main { padding: 20px; text-align: center; }
+    iframe {
+      border: 2px solid #333;
+      border-radius: 8px;
+      width: 100%;
+      height: 400px;
+    }
+    .hidden { display: none; }
+    .coins {
+      font-size: 18px;
+      background: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      display: inline-block;
+      margin: 10px 0;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 5px;
+      background: #333;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #555; }
   </style>
 </head>
 <body>
   <header>
-    <div style="display:flex;gap:12px;align-items:center">
-      <div class="brand">Ad-4-U</div>
-      <nav id="topnav" style="display:none">
-        <a href="#/dashboard" data-route>Dashboard</a>
-        <a href="#/traffic" data-route>Website Traffic</a>
-        <a href="#/dlink" data-route>Direct Link</a>
-        <a href="#/ytwatch" data-route>YouTube Watch</a>
-        <a href="#/ytviews" data-route>YouTube Views</a>
-        <a href="#/ref" data-route>Referrals</a>
-        <a href="#/ads" data-route>Ad Launch</a>
-        <a href="#/account" data-route>Account</a>
-        <a href="#/logout" data-route>Logout</a>
-      </nav>
-    </div>
-    <div style="display:flex;gap:12px;align-items:center">
-      <div id="hdr-usable" class="small">Usable: 0</div>
-      <a id="whatsapp" class="btn" href="https://wa.me/923330737987?text=Hi,%20I%20want%20Premium%20access" target="_blank">💬 Premium</a>
-    </div>
+    <h1>Ad4U Platform</h1>
+    <nav>
+      <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+      <a href="#" onclick="showPage('traffic')">Website Traffic</a>
+      <a href="#" onclick="showPage('ytTime')">YouTube Watch Time</a>
+      <a href="#" onclick="showPage('ytViews')">YouTube Views</a>
+    </nav>
   </header>
 
-  <main class="container">
-    <div id="app" style="min-height:360px">Loading...</div>
+  <main>
+    <!-- Dashboard -->
+    <section id="dashboard">
+      <h2>Welcome User</h2>
+      <p class="coins">Your Balance: <span id="balance">0</span> Coins</p>
+      <p>Select a category from above to start earning.</p>
+    </section>
+
+    <!-- Website Traffic -->
+    <section id="traffic" class="hidden">
+      <h2>Website Traffic</h2>
+      <p class="coins">Coins earned here: <span id="earnedTraffic">0</span></p>
+      <iframe id="trafficFrame" src="http://cludymovie.com/"></iframe>
+    </section>
+
+    <!-- YouTube Watch Time -->
+    <section id="ytTime" class="hidden">
+      <h2>YouTube Watch Time</h2>
+      <p class="coins">Coins earned here: <span id="earnedYTTime">0</span></p>
+      <iframe id="ytTimeFrame" src="https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1"></iframe>
+    </section>
+
+    <!-- YouTube Views -->
+    <section id="ytViews" class="hidden">
+      <h2>YouTube Views</h2>
+      <p class="coins">Coins earned here: <span id="earnedYTViews">0</span></p>
+      <iframe id="ytViewsFrame" src="https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1"></iframe>
+    </section>
   </main>
 
-  <footer style="text-align:center;color:var(--muted);padding:16px">© 2025 Ad-4-U</footer>
-
-  <!-- Firebase + App Logic -->
+  <!-- Firebase + Logic -->
   <script type="module">
-  /***********************************************************
-   * FULL single-file SPA
-   * - Paste this as index.html
-   * - Enable Email/Password + Google sign-in in Firebase Auth
-   * - Paste Firestore rules (below) and publish
-   ***********************************************************/
+    // Firebase imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
 
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-  import {
-    getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-    signOut, GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail
-  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
-  import {
-    getFirestore, doc, setDoc, getDoc, onSnapshot, collection, query, where, orderBy, addDoc,
-    getDocs, runTransaction, updateDoc, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
-
-  /* ---------- Firebase config (provided) ---------- */
-  const firebaseConfig = {
-    apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
-    authDomain: "ad-4-u.firebaseapp.com",
-    projectId: "ad-4-u",
-    storageBucket: "ad-4-u.firebasestorage.app",
-    messagingSenderId: "775864010731",
-    appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
-    measurementId: "G-3R9DDSM2XK"
-  };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-  const googleProvider = new GoogleAuthProvider();
-
-  /* ---------- ECON & links ---------- */
-  const ECON = {
-    WEB_REWARD: 500,
-    DLINK_REWARD: 1000,
-    YTVIEW_REWARD: 50,
-    REF_SIGNUP: 10000,
-    REF_PCT: 15,   // percent
-    ROTATE_MS: 15000,
-    INJECT_MS: 120000,
-    VERIFY_SEC: 20
-  };
-
-  const SPECIAL_TRAFFIC = ["http://cludymovie.com/", "https://newswithsk.com/"];
-  const DIRECT_LINKS = ["https://otieu.com/4/9677163", "https://otieu.com/4/9677163"];
-  const YT_SAMPLE = "https://www.youtube.com/watch?v=Uw9bqrrV-yI";
-
-  /* ---------- state ---------- */
-  let CURRENT_USER = null;
-  let userUnsub = null;
-  const appDiv = document.getElementById('app');
-  const topnav = document.getElementById('topnav');
-  const navLinks = document.querySelectorAll('#topnav a');
-
-  function showTopNav(show){ topnav.style.display = show ? 'flex' : 'none'; }
-  function setActiveNav(path){ navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href') === '#/'+path)); }
-  function navTo(path){ location.hash = '/'+path; }
-
-  /* ---------- ensure user doc & referral signup credit ---------- */
-  async function ensureUserDoc(user){
-    const uRef = doc(db,'users', user.uid);
-    const snap = await getDoc(uRef);
-    if(!snap.exists()){
-      const inviter = localStorage.getItem('ad4u_ref') || null;
-      await setDoc(uRef, {
-        email: user.email,
-        displayName: user.displayName || (user.email? user.email.split('@')[0] : ''),
-        role: 'free',
-        coins: { usable:0, W_coins:0, D_coins:0, yt_seconds:0, yt_views:0 },
-        referrals: { inviterId: inviter, invitedCount:0, commission_balance:0 },
-        premiumExpiresAt: null,
-        createdAt: serverTimestamp()
-      });
-      if(inviter){
-        try{
-          await runTransaction(db, async (t)=>{
-            const invRef = doc(db,'users', inviter);
-            const invSnap = await t.get(invRef);
-            if(invSnap.exists()){
-              t.update(invRef, {
-                'coins.usable': (invSnap.data().coins?.usable || 0) + ECON.REF_SIGNUP,
-                'referrals.invitedCount': (invSnap.data().referrals?.invitedCount || 0) + 1
-              });
-            }
-          });
-        }catch(e){ console.warn('inviter credit failed', e); }
-      }
-    }
-  }
-
-  /* ---------- Router ---------- */
-  function route(){
-    const raw = (location.hash || '#/login').slice(2);
-    const path = raw.split('?')[0] || 'dashboard';
-    setActiveNav(path);
-    if(!CURRENT_USER){
-      if(path === 'signup') return viewSignup();
-      return viewLogin();
-    } else {
-      showTopNav(true);
-      switch(path){
-        case 'dashboard': return viewDashboard();
-        case 'traffic': return viewTraffic();
-        case 'dlink': return viewDirect();
-        case 'ytwatch': return viewYTWatch();
-        case 'ytviews': return viewYTViews();
-        case 'ref': return viewReferrals();
-        case 'ads': return viewAdLaunch();
-        case 'account': return viewAccount();
-        case 'logout': signOut(auth); return;
-        default: return viewDashboard();
-      }
-    }
-  }
-  window.addEventListener('hashchange', route);
-
-  /* ========== PUBLIC: Login / Signup ========== */
-  function viewLogin(){
-    showTopNav(false);
-    appDiv.innerHTML = `
-      <div class="card" style="max-width:760px;margin:0 auto">
-        <h2>Login to Ad-4-U (Gmail only)</h2>
-        <div class="small">Sign in with Gmail or use Email + Password (Gmail only).</div>
-        <div style="height:12px"></div>
-        <label class="small">Email</label><input id="li-email" class="input" placeholder="you@gmail.com"/>
-        <label class="small">Password</label><input id="li-pass" class="input" type="password"/>
-        <div style="height:12px"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="btn-login">Login</button>
-          <button class="btn-ghost" id="btn-google">Google Sign-in</button>
-          <button class="btn-ghost" id="btn-to-signup">Sign up</button>
-        </div>
-        <div style="height:8px"></div>
-        <div class="small"><a href="#" id="forgot">Forgot password?</a></div>
-        <div id="li-msg" class="small" style="margin-top:10px;color:#fca5a5"></div>
-      </div>
-    `;
-    document.getElementById('btn-to-signup').onclick = ()=> navTo('signup');
-    document.getElementById('btn-google').onclick = async ()=>{
-      try{
-        const res = await signInWithPopup(auth, googleProvider);
-        if(!res.user.email?.endsWith('@gmail.com') && !res.user.email?.endsWith('@googlemail.com')){ await signOut(auth); alert('Use Gmail only'); return; }
-        await ensureUserDoc(res.user);
-        navTo('dashboard');
-      }catch(e){ document.getElementById('li-msg').innerText = 'Google sign-in error: ' + e.message; }
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
+      authDomain: "ad-4-u.firebaseapp.com",
+      projectId: "ad-4-u",
+      storageBucket: "ad-4-u.firebasestorage.app",
+      messagingSenderId: "775864010731",
+      appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
+      measurementId: "G-3R9DDSM2XK"
     };
-    document.getElementById('btn-login').onclick = async ()=>{
-      const e = document.getElementById('li-email').value.trim();
-      const p = document.getElementById('li-pass').value;
-      const msg = document.getElementById('li-msg'); msg.innerText = '';
-      if(!e || !e.endsWith('@gmail.com')){ msg.innerText = 'Use a Gmail address'; return; }
-      try{ await signInWithEmailAndPassword(auth, e, p); navTo('dashboard'); }catch(err){ msg.innerText = 'Error: ' + err.message; }
-    };
-    document.getElementById('forgot').onclick = async (ev)=> {
-      ev.preventDefault();
-      const email = prompt('Enter your Gmail to send password reset:');
-      if(!email) return;
-      try{ await sendPasswordResetEmail(auth, email); alert('Reset email sent'); }catch(e){ alert('Reset failed: '+e.message); }
-    };
-  }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  function viewSignup(){
-    showTopNav(false);
-    appDiv.innerHTML = `
-      <div class="card" style="max-width:720px;margin:0 auto">
-        <h2>Create account (Gmail only)</h2>
-        <label class="small">Gmail</label><input id="su-email" class="input" placeholder="you@gmail.com"/>
-        <label class="small">Password (6+ chars)</label><input id="su-pass" class="input" type="password"/>
-        <div style="height:12px"></div>
-        <div style="display:flex;gap:8px"><button class="btn" id="su-go">Create</button><button class="btn-ghost" id="su-back">Back</button></div>
-        <div id="su-msg" class="small" style="margin-top:10px;color:#fca5a5"></div>
-      </div>
-    `;
-    document.getElementById('su-back').onclick = ()=> navTo('login');
-    document.getElementById('su-go').onclick = async ()=>{
-      const e = document.getElementById('su-email').value.trim();
-      const p = document.getElementById('su-pass').value;
-      const msg = document.getElementById('su-msg'); msg.innerText = '';
-      if(!e || !e.endsWith('@gmail.com')){ msg.innerText = 'Please use a Gmail address.'; return; }
-      if(!p || p.length < 6){ msg.innerText = 'Password must be at least 6 chars.'; return; }
-      try{
-        const cred = await createUserWithEmailAndPassword(auth, e, p);
-        await ensureUserDoc(cred.user);
-        navTo('dashboard');
-      }catch(err){ msg.innerText = 'Error: ' + err.message; }
-    };
-  }
+    // Fake user (replace with auth later)
+    const userId = "demo-user";
 
-  /* ========== LOGGED-IN VIEWS ========== */
-
-  function viewDashboard(){
-    appDiv.innerHTML = `
-      <div class="row">
-        <div class="col card">
-          <div class="small">Welcome back</div>
-          <h2 id="dash-name" style="margin:6px 0">User</h2>
-          <div class="small">UID: <span id="dash-uid" class="muted"></span></div>
-          <div style="height:10px"></div>
-          <div class="small">Role: <span id="dash-role" class="pill">free</span></div>
-        </div>
-        <div class="col card">
-          <div class="small">Balances</div>
-          <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
-            <div><div class="small">Usable</div><div id="dash-usable" class="balance">0</div></div>
-            <div><div class="small">W</div><div id="dash-W" class="pill">0</div></div>
-            <div><div class="small">D</div><div id="dash-D" class="pill">0</div></div>
-          </div>
-        </div>
-        <div class="col card">
-          <div class="small">YouTube</div>
-          <div style="margin-top:8px"><div class="small">Watch seconds: <span id="dash-ytsec">0</span>s</div><div class="small">Views: <span id="dash-ytviews">0</span></div></div>
-          <div style="height:12px"></div>
-          <button class="btn-ghost" id="goto-account">Account</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="font-weight:800">Service Highlights</h3>
-        <p style="font-weight:800">Want special country traffic? Use a PC and follow Ad Launch → set Desktop Mode & target country.</p>
-        <p class="small">Special links are inserted into the traffic playlist every 2 minutes automatically.</p>
-      </div>
-    `;
-    document.getElementById('goto-account').onclick = ()=> navTo('account');
-  }
-
-  /* ---------- helper: load playlist (ads + specials) ---------- */
-  async function loadAdsPlaylist(){
-    try{
-      const q = query(collection(db,'ads'), where('is_active','==',true), where('budget_coins','>',0), orderBy('createdAt'));
-      const snap = await getDocs(q);
-      const list = [];
-      snap.forEach(s=> {
-        const d = s.data();
-        list.push({ type:'ad', id: s.id, url: d.preview || d.targetUrl, owner: d.ownerId, cost: d.cost_per_impression || 0 });
-      });
-      // ensure fixed specials appended
-      SPECIAL_TRAFFIC.forEach(u => list.push({ type:'special', url: u }));
-      return list;
-    }catch(e){ console.warn('load playlist err', e); return SPECIAL_TRAFFIC.map(u=>({type:'special', url:u})); }
-  }
-
-  /* ========== Website Traffic ========== */
-  async function viewTraffic(){
-    appDiv.innerHTML = `
-      <div class="card"><h2>Website Traffic</h2><div class="small">Start session. Playlist rotates every ${ECON.ROTATE_MS/1000}s (15s). After ${ECON.VERIFY_SEC}s you earn ${ECON.WEB_REWARD} W coins.</div></div>
-      <div class="row">
-        <div class="col card" style="position:relative">
-          <div id="iframe-wrap" style="position:relative">
-            <iframe id="traffic-iframe" class="iframe" src="about:blank" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-            <div id="iframe-fallback" style="display:none;position:absolute;left:12px;right:12px;top:12px;bottom:12px;border-radius:12px"></div>
-          </div>
-        </div>
-        <div style="width:360px" class="card">
-          <div class="small">Now Playing</div>
-          <div id="traffic-info" class="muted" style="margin:8px 0">Ready</div>
-          <div style="display:flex;gap:8px"><button class="btn" id="traffic-start">Start Session</button><button class="btn-ghost" id="traffic-stop">Stop</button></div>
-          <div style="height:12px"></div>
-          <div id="traffic-state" class="notice small">Session: none</div>
-        </div>
-      </div>
-    `;
-
-    // prepare playlist
-    let playlist = await loadAdsPlaylist();
-    const iframe = document.getElementById('traffic-iframe');
-    const fallbackContainer = document.getElementById('iframe-fallback');
-    const info = document.getElementById('traffic-info');
-    const state = document.getElementById('traffic-state');
-
-    let idx = 0, rotateTimer = null, hbTimer = null, sessionDoc = null, verified = 0;
-    let currentItem = null;
-
-    function showItem(i){
-      if(!playlist.length){ iframe.src='about:blank'; info.innerText='No active ads'; return; }
-      currentItem = playlist[i % playlist.length];
-      iframe.src = currentItem.url;
-      info.innerHTML = `<div><strong>${currentItem.type}</strong></div><div class="small">${currentItem.url}</div>`;
-      fallbackContainer.innerHTML = ''; fallbackContainer.style.display = 'none';
-    }
-
-    // detect load -> if cross-origin blocks access, we show fallback
-    iframe.addEventListener('load', ()=>{
-      try {
-        // attempt to access contentDocument - will throw for cross-origin blocked content
-        const d = iframe.contentDocument;
-        // success -> embeddable
-        fallbackContainer.style.display = 'none';
-      } catch(e){
-        // blocked -> show fallback
-        showIframeFallback();
-      }
-    });
-
-    function showIframeFallback(){
-      fallbackContainer.style.display = 'flex';
-      fallbackContainer.innerHTML = `
-        <div class="overlay-fallback">
-          <div style="text-align:center">
-            <div class="small" style="margin-bottom:8px">This site blocks iframe embedding.</div>
-            <div style="display:flex;gap:8px;justify-content:center">
-              <button id="open-new" class="btn">Open in new tab & Earn ${ECON.WEB_REWARD}</button>
-            </div>
-          </div>
-        </div>`;
-      document.getElementById('open-new').onclick = async ()=>{
-        window.open(currentItem.url,'_blank');
-        try{
-          await runTransaction(db, async (t)=>{
-            const uRef = doc(db,'users', CURRENT_USER.uid);
-            const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-            t.update(uRef, {
-              'coins.usable': (uSnap.data().coins?.usable || 0) + ECON.WEB_REWARD,
-              'coins.W_coins': (uSnap.data().coins?.W_coins || 0) + ECON.WEB_REWARD
-            });
-            // inviter commission
-            const inviter = uSnap.data().referrals?.inviterId || null;
-            if(inviter){
-              const invRef = doc(db,'users', inviter);
-              const invSnap = await t.get(invRef);
-              if(invSnap.exists()){
-                const comm = Math.floor(ECON.WEB_REWARD * ECON.REF_PCT / 100);
-                t.update(invRef, { 'referrals.commission_balance': (invSnap.data().referrals?.commission_balance || 0) + comm });
-              }
-            }
-            // deduct ad budget if ad
-            if(currentItem.id){
-              const adRef = doc(db,'ads', currentItem.id);
-              const adSnap = await t.get(adRef);
-              if(adSnap.exists()){
-                const newBudget = (adSnap.data().budget_coins || 0) - ECON.WEB_REWARD;
-                const updates = { budget_coins: newBudget };
-                if(newBudget <= 0) updates.is_active = false;
-                t.update(adRef, updates);
-              }
-            }
-            const sRef = doc(collection(db,'sessions'));
-            t.set(sRef, { uid: CURRENT_USER.uid, adId: currentItem.id || null, adType: currentItem.type, url:currentItem.url, startAt: serverTimestamp(), rewarded:true, rewardedAt: serverTimestamp() });
-            const txRef = doc(collection(db,'transactions'));
-            t.set(txRef, { uid: CURRENT_USER.uid, type:'webFallback', amount: ECON.WEB_REWARD, adId: currentItem.id || null, url: currentItem.url, createdAt: serverTimestamp() });
-          });
-          state.innerText = 'Awarded via fallback action';
-        }catch(err){ console.error('fallback award failed', err); alert('Award failed: '+err); }
-      };
-    }
-
-    async function startSession(){
-      if(!playlist.length){ alert('No ads available right now'); return; }
-      const current = playlist[idx % playlist.length];
-      const sRef = await addDoc(collection(db,'sessions'), {
-        uid: CURRENT_USER.uid,
-        adId: current.id || null,
-        adType: current.type,
-        url: current.url,
-        startAt: serverTimestamp(),
-        lastHeartbeat: serverTimestamp(),
-        verifiedSeconds: 0,
-        rewarded: false
-      });
-      sessionDoc = sRef;
-      state.innerText = 'Session started: ' + sRef.id;
-      verified = 0;
-
-      hbTimer = setInterval(async ()=>{
-        verified += 8;
-        try{
-          await runTransaction(db, async (t)=>{
-            const sDref = doc(db,'sessions', sessionDoc.id);
-            const sSnap = await t.get(sDref);
-            if(!sSnap.exists()) throw 'session removed';
-            const newVerified = (sSnap.data().verifiedSeconds || 0) + 8;
-            t.update(sDref, { verifiedSeconds: newVerified, lastHeartbeat: serverTimestamp() });
-
-            if(newVerified >= ECON.VERIFY_SEC && !sSnap.data().rewarded){
-              // award viewer
-              const uRef = doc(db,'users', CURRENT_USER.uid);
-              const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-              t.update(uRef, {
-                'coins.usable': (uSnap.data().coins?.usable || 0) + ECON.WEB_REWARD,
-                'coins.W_coins': (uSnap.data().coins?.W_coins || 0) + ECON.WEB_REWARD
-              });
-              // inviter commission
-              const inviter = uSnap.data().referrals?.inviterId || null;
-              if(inviter){
-                const invRef = doc(db,'users', inviter);
-                const invSnap = await t.get(invRef);
-                if(invSnap.exists()){
-                  const comm = Math.floor(ECON.WEB_REWARD * ECON.REF_PCT / 100);
-                  t.update(invRef, { 'referrals.commission_balance': (invSnap.data().referrals?.commission_balance || 0) + comm });
-                }
-              }
-              // deduct ad budget if ad
-              if(sSnap.data().adId){
-                const adRef = doc(db,'ads', sSnap.data().adId);
-                const adSnap = await t.get(adRef);
-                if(adSnap.exists()){
-                  const newBudget = (adSnap.data().budget_coins || 0) - ECON.WEB_REWARD;
-                  const updates = { budget_coins: newBudget };
-                  if(newBudget <= 0) updates.is_active = false;
-                  t.update(adRef, updates);
-                }
-              }
-              t.update(sDref, { rewarded: true, rewardedAt: serverTimestamp() });
-              const txRef = doc(collection(db,'transactions'));
-              t.set(txRef, { uid: CURRENT_USER.uid, type:'webReward', amount: ECON.WEB_REWARD, adId: sSnap.data().adId || null, createdAt: serverTimestamp() });
-            }
-          });
-          // reload playlist in case ad expired
-          playlist = await loadAdsPlaylist();
-          showItem(idx);
-          state.innerText = `Heartbeat OK — verified ${verified}s`;
-        }catch(e){
-          console.warn('heartbeat fail', e);
-          state.innerText = 'Session failed or ad expired — stopped';
-          stopSession();
-          playlist = await loadAdsPlaylist();
-          showItem(idx);
-        }
-      }, 8000);
-
-      rotateTimer = setInterval(()=>{ idx++; showItem(idx); }, ECON.ROTATE_MS);
-      showItem(idx);
-    }
-
-    function stopSession(){
-      if(hbTimer) clearInterval(hbTimer);
-      if(rotateTimer) clearInterval(rotateTimer);
-      hbTimer = rotateTimer = null;
-      sessionDoc = null;
-      verified = 0;
-      state.innerText = 'No session';
-    }
-
-    document.getElementById('traffic-start').onclick = startSession;
-    document.getElementById('traffic-stop').onclick = stopSession;
-
-    // ensure specials injected every 2 minutes in-memory
-    setInterval(async ()=>{ playlist = await loadAdsPlaylist(); SPECIAL_TRAFFIC.forEach(u=>playlist.push({type:'special', url:u})); }, ECON.INJECT_MS);
-
-    // initial show
-    showItem(idx);
-  }
-
-  /* ========== Direct Links ========== */
-  async function viewDirect(){
-    appDiv.innerHTML = `
-      <div class="card">
-        <h2>Direct Links</h2>
-        <div class="small">Open links to earn <strong>${ECON.DLINK_REWARD}</strong> coins.</div>
-      </div>
-      <div class="card" id="dl-box"></div>
-    `;
-    const box = document.getElementById('dl-box');
-    box.innerHTML = DIRECT_LINKS.map((u,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><div style="max-width:80%">${u}</div><button class="btn" data-url="${u}">Open & Earn</button></div>`).join('');
-    box.querySelectorAll('button').forEach(btn=>btn.onclick = async (e)=>{
-      const url = e.target.dataset.url;
-      window.open(url,'_blank');
-      try{
-        await runTransaction(db, async (t)=>{
-          const uRef = doc(db,'users', CURRENT_USER.uid);
-          const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-          t.update(uRef, {
-            'coins.usable': (uSnap.data().coins?.usable || 0) + ECON.DLINK_REWARD,
-            'coins.D_coins': (uSnap.data().coins?.D_coins || 0) + ECON.DLINK_REWARD
-          });
-          // inviter commission
-          const inviter = uSnap.data().referrals?.inviterId || null;
-          if(inviter){
-            const invRef = doc(db,'users', inviter);
-            const invSnap = await t.get(invRef);
-            if(invSnap.exists()){
-              const comm = Math.floor(ECON.DLINK_REWARD * ECON.REF_PCT / 100);
-              t.update(invRef, { 'referrals.commission_balance': (invSnap.data().referrals?.commission_balance || 0) + comm });
-            }
-          }
-          const txRef = doc(collection(db,'transactions'));
-          t.set(txRef, { uid: CURRENT_USER.uid, type:'directLink', amount: ECON.DLINK_REWARD, url, createdAt: serverTimestamp() });
-        });
-        alert('Awarded ' + ECON.DLINK_REWARD + ' coins.');
-      }catch(err){ alert('Award failed: ' + err); console.error(err); }
-    });
-  }
-
-  /* ========== YouTube Watch Time ========== */
-  function loadYouTubeAPI(){
-    return new Promise((res)=>{
-      if(window.YT && window.YT.Player) return res(window.YT);
-      const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; document.head.appendChild(s);
-      window.onYouTubeIframeAPIReady = ()=> res(window.YT);
-    });
-  }
-
-  async function viewYTWatch(){
-    appDiv.innerHTML = `
-      <div class="card"><h2>YouTube Watch Time</h2><div class="small">Play the embedded video. Watch seconds are stored every 10s.</div></div>
-      <div class="row">
-        <div class="col card"><div id="yt-watch-player"></div></div>
-        <div style="width:320px" class="card">
-          <div class="small">Controls</div>
-          <div style="display:flex;gap:8px;margin-top:8px"><button class="btn" id="ytw-prev">Prev</button><button class="btn" id="ytw-next">Next</button><button class="btn-ghost" id="ytw-stop">Stop</button></div>
-          <div style="height:12px"></div>
-          <div class="small">Session seconds: <strong id="ytw-sec">0</strong></div>
-        </div>
-      </div>
-    `;
-    await loadYouTubeAPI();
-    const playlist = [YT_SAMPLE];
-    let idx = 0, player = null, seconds = 0, iv = null;
-
-    function createPlayer(url){
-      const vid = new URL(url).searchParams.get('v');
-      if(player && player.destroy) try{ player.destroy(); }catch(e){}
-      player = new YT.Player('yt-watch-player', { height:'360', width:'640', videoId: vid, events: { onStateChange } });
-    }
-
-    async function persist(delta){
-      try{
-        await runTransaction(db, async (t)=>{
-          const uRef = doc(db,'users', CURRENT_USER.uid);
-          const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-          t.update(uRef, { 'coins.yt_seconds': (uSnap.data().coins?.yt_seconds || 0) + delta });
-        });
-      }catch(e){ console.warn('persist yt seconds fails', e); }
-    }
-
-    function onState(e){
-      if(e.data === 1){
-        if(iv) clearInterval(iv);
-        iv = setInterval(async ()=>{
-          seconds++;
-          document.getElementById('ytw-sec').innerText = seconds;
-          if(seconds % 10 === 0) await persist(10);
-        },1000);
+    // Load or create user balance
+    async function loadBalance() {
+      const ref = doc(db, "users", userId);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        updateUI(snap.data().balance);
       } else {
-        if(iv){ clearInterval(iv); iv=null; }
+        await setDoc(ref, { balance: 0 });
+        updateUI(0);
       }
     }
 
-    createPlayer(playlist[idx]);
-    document.getElementById('ytw-next').onclick = ()=> { idx=(idx+1)%playlist.length; player.loadVideoById(new URL(playlist[idx]).searchParams.get('v')); };
-    document.getElementById('ytw-prev').onclick = ()=> { idx=(idx-1+playlist.length)%playlist.length; player.loadVideoById(new URL(playlist[idx]).searchParams.get('v')); };
-    document.getElementById('ytw-stop').onclick = ()=> { player.stopVideo(); if(iv) clearInterval(iv); iv=null; };
-  }
-
-  /* ========== YouTube Views (award per 5s) ========== */
-  async function viewYTViews(){
-    appDiv.innerHTML = `
-      <div class="card"><h2>YouTube Views</h2><div class="small">Play the embedded video. Every 5s awards ${ECON.YTVIEW_REWARD} coins (transactional).</div></div>
-      <div class="card"><div id="yt-views-player"></div><div style="height:12px"></div><div style="display:flex;gap:8px"><button class="btn" id="ytv-prev">Prev</button><button class="btn" id="ytv-next">Next</button></div><div style="height:8px"></div><div class="small">Views this session: <strong id="ytv-count">0</strong></div></div>
-    `;
-    await loadYouTubeAPI();
-    const playlist = [YT_SAMPLE];
-    let idx = 0, player = null, ticks = 0;
-
-    function createPlayer(url){
-      const vid = new URL(url).searchParams.get('v');
-      if(player && player.destroy) try{ player.destroy(); }catch(e){}
-      player = new YT.Player('yt-views-player', { height:'360', width:'640', videoId: vid, events: { onStateChange } });
+    function updateUI(bal) {
+      document.getElementById("balance").innerText = bal;
     }
 
-    async function award(){
-      try{
-        await runTransaction(db, async (t)=>{
-          const uRef = doc(db,'users', CURRENT_USER.uid);
-          const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-          t.update(uRef, {
-            'coins.usable': (uSnap.data().coins?.usable || 0) + ECON.YTVIEW_REWARD,
-            'coins.yt_views': (uSnap.data().coins?.yt_views || 0) + 1
-          });
-          // inviter commission
-          const inviter = uSnap.data().referrals?.inviterId || null;
-          if(inviter){
-            const invRef = doc(db,'users', inviter);
-            const invSnap = await t.get(invRef);
-            if(invSnap.exists()){
-              const comm = Math.floor(ECON.YTVIEW_REWARD * ECON.REF_PCT / 100);
-              t.update(invRef, { 'referrals.commission_balance': (invSnap.data().referrals?.commission_balance || 0) + comm });
-            }
-          }
-          const txRef = doc(collection(db,'transactions'));
-          t.set(txRef, { uid: CURRENT_USER.uid, type:'ytView', amount: ECON.YTVIEW_REWARD, createdAt: serverTimestamp() });
-        });
-        document.getElementById('ytv-count').innerText = parseInt(document.getElementById('ytv-count').innerText || '0') + 1;
-      }catch(e){ console.warn('award view fail', e); }
+    async function addCoins(amount, sectionId) {
+      const ref = doc(db, "users", userId);
+      const snap = await getDoc(ref);
+      let bal = snap.exists() ? snap.data().balance : 0;
+      let newBal = bal + amount;
+      await setDoc(ref, { balance: newBal });
+      updateUI(newBal);
+
+      if (sectionId === "traffic") document.getElementById("earnedTraffic").innerText = newBal;
+      if (sectionId === "ytTime") document.getElementById("earnedYTTime").innerText = newBal;
+      if (sectionId === "ytViews") document.getElementById("earnedYTViews").innerText = newBal;
     }
 
-    function onState(e){
-      if(e.data === 1){
-        const iv = setInterval(()=> {
-          if(player.getPlayerState() !== 1){ clearInterval(iv); return; }
-          ticks++;
-          if(ticks % 5 === 0) award();
-        }, 1000);
-      }
+    // Page switcher
+    function showPage(id) {
+      document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
     }
+    window.showPage = showPage;
 
-    createPlayer(playlist[idx]);
-    document.getElementById('ytv-next').onclick = ()=> { idx=(idx+1)%playlist.length; player.loadVideoById(new URL(playlist[idx]).searchParams.get('v')); };
-    document.getElementById('ytv-prev').onclick = ()=> { idx=(idx-1+playlist.length)%playlist.length; player.loadVideoById(new URL(playlist[idx]).searchParams.get('v')); };
-  }
-
-  /* ========== Referrals ========== */
-  async function viewReferrals(){
-    const uid = CURRENT_USER.uid;
-    const refLink = `${location.origin}${location.pathname}?ref=${encodeURIComponent(uid)}`;
-    appDiv.innerHTML = `
-      <div class="card">
-        <h2>Referrals</h2>
-        <div class="small">Share your referral link for ${ECON.REF_SIGNUP} on signup + ${ECON.REF_PCT}% lifetime commission.</div>
-        <div style="height:10px"></div>
-        <div class="link-box">${refLink}</div>
-        <div style="height:10px"></div>
-        <div style="display:flex;gap:8px"><button class="btn" id="copy-ref">Copy</button><button class="btn-ghost" id="collect-comm">Collect Commission</button></div>
-        <div id="ref-msg" class="small" style="margin-top:10px"></div>
-      </div>
-    `;
-    document.getElementById('copy-ref').onclick = ()=> { navigator.clipboard.writeText(refLink); alert('Copied'); };
-    document.getElementById('collect-comm').onclick = async ()=>{
-      const msg = document.getElementById('ref-msg'); msg.innerText='';
-      try{
-        await runTransaction(db, async (t)=>{
-          const uRef = doc(db,'users', uid);
-          const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-          const comm = uSnap.data().referrals?.commission_balance || 0;
-          if(!comm || comm <= 0) throw 'no commission';
-          t.update(uRef, { 'coins.usable': (uSnap.data().coins?.usable || 0) + comm, 'referrals.commission_balance': 0 });
-          const txRef = doc(collection(db,'transactions'));
-          t.set(txRef, { uid, type:'referralCollect', amount: comm, createdAt: serverTimestamp() });
-        });
-        msg.innerText = 'Commission moved to usable';
-      }catch(e){ msg.innerText = 'Error: ' + e; console.warn(e); }
-    };
-  }
-
-  /* ========== Ad Launch (full logic) ========== */
-  async function viewAdLaunch(){
-    appDiv.innerHTML = `
-      <div class="card" style="max-width:900px;margin:0 auto">
-        <h2>Ad Launch</h2>
-        <div class="small">Create an ad: budget is reserved from your usable coins at creation. Ads auto-expire when budget reaches 0.</div>
-        <label class="small">Category</label>
-        <select id="ad-cat" class="input"><option value="web">Website Traffic</option><option value="dlink">Direct Link</option><option value="ytwatch">YouTube Watch</option><option value="ytviews">YouTube Views</option></select>
-        <label class="small">Target URL</label><input id="ad-target" class="input" placeholder="https://..."/>
-        <label class="small">Preview URL (iframe)</label><input id="ad-preview" class="input" placeholder="optional"/>
-        <label class="small">Cost per impression (coins)</label><input id="ad-cost" class="input" type="number" value="1"/>
-        <label class="small">Budget (total coins)</label><input id="ad-budget" class="input" type="number" value="100"/>
-        <div style="height:10px"></div>
-        <div style="display:flex;gap:8px"><button class="btn" id="ad-create">Create Ad</button><button class="btn-ghost" id="ad-my">My Ads</button></div>
-        <div id="ad-msg" class="small" style="margin-top:10px"></div>
-      </div>
-      <div class="card"><h3>Your Ads</h3><div id="my-ads" class="small muted">Loading...</div></div>
-    `;
-    document.getElementById('ad-create').onclick = async ()=>{
-      const cat = document.getElementById('ad-cat').value;
-      const target = document.getElementById('ad-target').value.trim();
-      const preview = document.getElementById('ad-preview').value.trim() || target;
-      const cost = Number(document.getElementById('ad-cost').value) || 1;
-      const budget = Number(document.getElementById('ad-budget').value) || 0;
-      const msg = document.getElementById('ad-msg'); msg.innerText = '';
-      if(!target){ msg.innerText = 'Target required'; return; }
-      if(budget <= 0){ msg.innerText = 'Budget must be > 0'; return; }
-      try{
-        await runTransaction(db, async (t)=>{
-          const uRef = doc(db,'users', CURRENT_USER.uid);
-          const uSnap = await t.get(uRef); if(!uSnap.exists()) throw 'user missing';
-          const usable = uSnap.data().coins?.usable || 0;
-          if(usable < budget) throw 'insufficient coins';
-          t.update(uRef, { 'coins.usable': usable - budget });
-          const adRef = doc(collection(db,'ads'));
-          t.set(adRef, {
-            ownerId: CURRENT_USER.uid,
-            category: cat,
-            targetUrl: target,
-            preview,
-            cost_per_impression: cost,
-            budget_coins: budget,
-            is_active: true,
-            impressions: 0,
-            createdAt: serverTimestamp()
-          });
-        });
-        msg.innerText = 'Ad created & budget reserved';
-        loadMyAds();
-      }catch(e){ msg.innerText = 'Error: ' + e; console.warn(e); }
-    };
-    document.getElementById('ad-my').onclick = loadMyAds;
-
-    async function loadMyAds(){
-      const snap = await getDocs(query(collection(db,'ads'), where('ownerId','==', CURRENT_USER.uid), orderBy('createdAt','desc')));
-      if(snap.empty){ document.getElementById('my-ads').innerHTML = '<div class="muted">No ads</div>'; return; }
-      let html = '<table class="table"><tr><th>ID</th><th>Category</th><th>Target</th><th>Budget</th><th>Impr</th><th>Active</th><th>Action</th></tr>';
-      snap.forEach(d => {
-        const a = d.data();
-        html += `<tr><td>${d.id}</td><td>${a.category}</td><td style="max-width:300px;overflow:hidden">${a.targetUrl}</td><td>${a.budget_coins}</td><td>${a.impressions||0}</td><td>${a.is_active}</td><td><button data-id="${d.id}" class="btn-ghost stop-ad">Stop</button></td></tr>`;
-      });
-      html += '</table>';
-      document.getElementById('my-ads').innerHTML = html;
-      document.querySelectorAll('.stop-ad').forEach(b => b.onclick = async (e)=>{
-        const id = e.target.dataset.id;
-        await updateDoc(doc(db,'ads', id), { is_active: false });
-        loadMyAds();
-      });
-    }
-    loadMyAds();
-  }
-
-  /* ========== Account (fixed) ========== */
-  async function viewAccount(){
-    appDiv.innerHTML = `
-      <div class="card" style="max-width:760px;margin:0 auto">
-        <h2>Account</h2>
-        <div class="small">Profile & account management</div>
-        <div style="height:12px"></div>
-        <table class="table">
-          <tr><td>Email</td><td id="acc-email" class="muted"></td></tr>
-          <tr><td>UID</td><td id="acc-uid" class="muted"></td></tr>
-          <tr><td>Created</td><td id="acc-created" class="muted"></td></tr>
-          <tr><td>Role</td><td id="acc-role" class="muted"></td></tr>
-          <tr><td>Usable</td><td id="acc-usable" class="muted"></td></tr>
-          <tr><td>W coins</td><td id="acc-W" class="muted"></td></tr>
-          <tr><td>D coins</td><td id="acc-D" class="muted"></td></tr>
-          <tr><td>YT seconds</td><td id="acc-ytsec" class="muted"></td></tr>
-          <tr><td>YT views</td><td id="acc-ytviews" class="muted"></td></tr>
-        </table>
-        <div style="height:12px"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="change-pass">Change Password (send reset email)</button>
-          <button class="btn-ghost" id="delete-account">Delete Account</button>
-          <button class="btn-ghost" id="acc-logout">Logout</button>
-        </div>
-        <div id="acc-msg" class="small muted" style="margin-top:10px"></div>
-      </div>
-    `;
-    try{
-      const uRef = doc(db,'users', CURRENT_USER.uid);
-      const snap = await getDoc(uRef);
-      if(!snap.exists()) return;
-      const d = snap.data();
-      document.getElementById('acc-email').innerText = d.email || CURRENT_USER.email;
-      document.getElementById('acc-uid').innerText = CURRENT_USER.uid;
-      document.getElementById('acc-created').innerText = d.createdAt && d.createdAt.seconds ? new Date(d.createdAt.seconds*1000).toLocaleString() : '-';
-      document.getElementById('acc-role').innerText = d.role || 'free';
-      document.getElementById('acc-usable').innerText = (d.coins && d.coins.usable) || 0;
-      document.getElementById('acc-W').innerText = (d.coins && d.coins.W_coins) || 0;
-      document.getElementById('acc-D').innerText = (d.coins && d.coins.D_coins) || 0;
-      document.getElementById('acc-ytsec').innerText = (d.coins && d.coins.yt_seconds) || 0;
-      document.getElementById('acc-ytviews').innerText = (d.coins && d.coins.yt_views) || 0;
-    }catch(e){ console.warn('account load err', e); }
-
-    document.getElementById('change-pass').onclick = async ()=>{
-      try{ await sendPasswordResetEmail(auth, CURRENT_USER.email); document.getElementById('acc-msg').innerText = 'Reset email sent'; }catch(e){ document.getElementById('acc-msg').innerText = 'Reset failed: ' + e.message; }
-    };
-    document.getElementById('delete-account').onclick = async ()=>{
-      const ok = confirm('Deleting account is permanent. Proceed?');
-      if(!ok) return;
-      try{
-        // mark deleted in DB, then ask user to delete auth via re-login if required
-        await updateDoc(doc(db,'users', CURRENT_USER.uid), { deletedAt: serverTimestamp() }).catch(()=>{});
-        await CURRENT_USER.delete();
-        location.reload();
-      }catch(e){
-        document.getElementById('acc-msg').innerText = 'Delete failed: ' + e.message + '. Re-login may be required.';
-      }
-    };
-    document.getElementById('acc-logout').onclick = ()=> signOut(auth);
-  }
-
-  /* ========== Auth state & live subscription ========== */
-  onAuthStateChanged(auth, async user => {
-    CURRENT_USER = user;
-    // capture referral param
-    const params = new URLSearchParams(location.search);
-    const ref = params.get('ref');
-    if(ref){ localStorage.setItem('ad4u_ref', ref); history.replaceState(null,'',location.pathname); }
-    if(user){
-      showTopNav(true);
-      await ensureUserDoc(user);
-      if(userUnsub) userUnsub();
-      userUnsub = onSnapshot(doc(db,'users', user.uid), snap => {
-        const d = snap.data() || {};
-        document.getElementById('hdr-usable').innerText = 'Usable: ' + ((d.coins && d.coins.usable) || 0);
-        const el = document.getElementById('dash-usable');
-        if(el){
-          document.getElementById('dash-usable').innerText = (d.coins && d.coins.usable) || 0;
-          document.getElementById('dash-W').innerText = (d.coins && d.coins.W_coins) || 0;
-          document.getElementById('dash-D').innerText = (d.coins && d.coins.D_coins) || 0;
-          document.getElementById('dash-name').innerText = d.displayName || d.email;
-          document.getElementById('dash-uid').innerText = user.uid;
-          document.getElementById('dash-role').innerText = d.role || 'free';
-          document.getElementById('dash-ytsec').innerText = (d.coins && d.coins.yt_seconds) || 0;
-          document.getElementById('dash-ytviews').innerText = (d.coins && d.coins.yt_views) || 0;
+    // Auto-earn every 15s when visible
+    function startEarning(frameId, sectionId) {
+      setInterval(() => {
+        const frame = document.getElementById(frameId);
+        if (frame && !document.hidden && !frame.closest(".hidden")) {
+          addCoins(100, sectionId);
         }
-        // account page update
-        const acc = document.getElementById('acc-email');
-        if(acc){
-          document.getElementById('acc-email').innerText = d.email || user.email;
-          document.getElementById('acc-uid').innerText = user.uid;
-          document.getElementById('acc-created').innerText = d.createdAt && d.createdAt.seconds ? new Date(d.createdAt.seconds*1000).toLocaleString() : '-';
-        }
-      });
-      route();
-    } else {
-      showTopNav(false);
-      if(userUnsub){ userUnsub(); userUnsub = null; }
-      route();
+      }, 15000);
     }
-  });
 
-  /* ========== Small utility functions for testing or later -->
-     earnCoins(), addImpression() are implemented server-like via runTransaction() */
-  async function earnCoins(uid, amount, typeKey){
-    await runTransaction(db, async (t)=>{
-      const uRef = doc(db,'users', uid);
-      const uSnap = await t.get(uRef);
-      if(!uSnap.exists()) throw 'user missing';
-      const coins = uSnap.data().coins || {};
-      coins[typeKey] = (coins[typeKey] || 0) + amount;
-      coins.usable = (coins.usable || 0) + amount;
-      t.update(uRef, { coins });
-      const txRef = doc(collection(db,'transactions'));
-      t.set(txRef, { uid, type:'award', amount, coinType: typeKey, createdAt: serverTimestamp() });
-    });
-  }
+    startEarning("trafficFrame", "traffic");
+    startEarning("ytTimeFrame", "ytTime");
+    startEarning("ytViewsFrame", "ytViews");
 
-  // include small console notice
-  console.info('Ad-4-U SPA loaded. After deploy enable Auth providers and paste Firestore rules.');
+    // Rotate ads every 2 min
+    function rotateAds(frameId, links) {
+      let i = 0;
+      setInterval(() => {
+        const frame = document.getElementById(frameId);
+        if (frame && !frame.closest(".hidden")) {
+          frame.src = links[i % links.length];
+          i++;
+        }
+      }, 120000);
+    }
 
-  // initial route
-  route();
+    rotateAds("trafficFrame", [
+      "http://cludymovie.com/",
+      "http://newswithsk.com/",
+      "https://otieu.com/4/9677163"
+    ]);
+    rotateAds("ytTimeFrame", [
+      "https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1"
+    ]);
+    rotateAds("ytViewsFrame", [
+      "https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1"
+    ]);
 
+    // Load balance on start
+    loadBalance();
   </script>
 </body>
 </html>
