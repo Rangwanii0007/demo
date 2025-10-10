@@ -1,293 +1,298 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pro Ad Platform</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-</head>
-<body class="bg-gray-100 font-sans text-gray-700">
-
-<!-- HEADER -->
-<header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
-  <h1 class="text-2xl font-bold">Pro Ad Platform</h1>
-  <button id="loginBtn" class="bg-white text-gray-900 px-4 py-2 rounded hover:bg-gray-200">Login with Google</button>
-</header>
-
-<!-- MAIN CONTENT -->
-<div class="container mx-auto p-4 space-y-4">
-
-  <!-- Authenticated Dashboard -->
-  <div id="dashboard" class="hidden bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto space-y-4">
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="text-xl font-semibold mb-2">Welcome, <span id="userName" class="font-bold"></span></h2>
-        <p class="mb-1">Email: <span id="userEmail"></span></p>
-        <p class="mb-1">Coins: <span id="userCoins" class="text-green-500 font-semibold"></span></p>
-        <p class="mb-1">Status: <span id="userStatus" class="font-semibold"></span></p>
-      </div>
-      <div class="flex space-x-2">
-        <button id="earnCoinsBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Watch Ad (+100 coins)</button>
-        <button id="launchAdBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Launch Ad</button>
-      </div>
-    </div>
-
-    <!-- Navigation Buttons -->
-    <div class="flex flex-wrap gap-2 mt-4">
-      <button class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" data-section="traffic">Traffic Ads</button>
-      <button class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" data-section="youtube">YouTube Watch</button>
-      <button class="w-full md:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded" data-section="views">YouTube Views</button>
-      <button class="w-full md:w-auto bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded" data-section="links">Direct Links</button>
-      <button class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded" data-section="profile">Profile Settings</button>
-    </div>
-
-    <!-- Sections -->
-    <div class="mt-4">
-
-      <!-- Traffic Ads -->
-      <div id="section-traffic" class="hidden">
-        <h3 class="text-lg font-semibold mb-2">Traffic Ads</h3>
-        <button id="loadTrafficAds" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded mb-2">Load Traffic Ads</button>
-        <div id="trafficAdsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-      </div>
-
-      <!-- YouTube Watch -->
-      <div id="section-youtube" class="hidden">
-        <h3 class="text-lg font-semibold mb-2">Watch YouTube Video</h3>
-        <button id="loadYoutube" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mb-2">Watch Video (1 min)</button>
-        <div id="youtubeContainer" class="mt-4"></div>
-      </div>
-
-      <!-- YouTube Views -->
-      <div id="section-views" class="hidden">
-        <h3 class="text-lg font-semibold mb-2">YouTube Views</h3>
-        <button id="loadViews" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mb-2">Show Videos</button>
-        <div id="viewsContainer" class="space-y-4"></div>
-      </div>
-
-      <!-- Direct Links -->
-      <div id="section-links" class="hidden">
-        <h3 class="text-lg font-semibold mb-2">Direct Links</h3>
-        <button id="showLinks" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded mb-2">Show Links</button>
-        <div id="linksContainer" class="space-y-2"></div>
-      </div>
-
-      <!-- Profile Settings -->
-      <div id="section-profile" class="hidden border-t pt-4 space-y-4">
-        <h3 class="text-lg font-semibold mb-2">Profile Settings</h3>
-        <label class="block mb-2">Name:
-          <input type="text" id="profileName" class="w-full border rounded px-3 py-2" />
-        </label>
-        <label class="block mb-2 flex items-center space-x-2">
-          <input type="checkbox" id="profilePremium" />
-          <span>Premium User</span>
-        </label>
-        <button id="updateProfile" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Update Profile</button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Login Prompt (before login) -->
-  <div id="loginPrompt" class="max-w-xl mx-auto p-4 bg-white rounded-lg shadow-lg text-center hidden">
-    <h2 class="text-xl font-semibold mb-4">Please Login to Continue</h2>
-    <button id="loginGoogle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login with Google</button>
-  </div>
-
-</div>
-
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-
-<script>
-  // Initialize Firebase (replace with your config)
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
-  let currentUser = null;
-
-  // Elements
-  const loginBtn = document.getElementById('loginGoogle');
-  const loginPrompt = document.getElementById('loginPrompt');
-  const dashboard = document.getElementById('dashboard');
-
-  const userNameSpan = document.getElementById('userName');
-  const userEmailSpan = document.getElementById('userEmail');
-  const userCoinsSpan = document.getElementById('userCoins');
-  const userStatusSpan = document.getElementById('userStatus');
-
-  const profileNameInput = document.getElementById('profileName');
-  const profilePremiumCheckbox = document.getElementById('profilePremium');
-
-  // Sections
-  const sections = {
-    traffic: document.getElementById('section-traffic'),
-    youtube: document.getElementById('section-youtube'),
-    views: document.getElementById('section-views'),
-    links: document.getElementById('section-links'),
-    profile: document.getElementById('section-profile')
-  };
-
-  // Show/hide sections
-  document.querySelectorAll('button[data-section]').forEach(btn => {
-    btn.onclick = () => {
-      Object.values(sections).forEach(sec => sec.classList.add('hidden'));
-      const target = btn.dataset.section;
-      sections[target].classList.remove('hidden');
-    };
-  });
-
-  // Login
-  document.getElementById('loginGoogle').onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(res => {
-      currentUser = res.user;
-      initializeUser();
-    });
-  };
-
-  // Check auth state
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      currentUser = user;
-      initializeUser();
-    } else {
-      loginPrompt.classList.remove('hidden');
-      dashboard.classList.add('hidden');
+  <meta charset="UTF-8">
+  <title>Ad4U — Free Ad Network</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    /* ─── Variables & Reset ───────────────────────────────────── */
+    :root {
+      --bg:#f4f7fc; --fg:#333; --accent:#3f51b5;
+      --white:#fff; --radius:8px; --gap:1rem;
     }
-  });
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:Segoe UI, sans-serif; background:var(--bg); color:var(--fg); line-height:1.5; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    button { background:var(--accent); color:var(--white); border:none; padding:.6em 1.2em; border-radius:var(--radius); cursor:pointer; }
+    button:disabled { opacity:.5; cursor:default; }
+    input, select { padding:.5em; border:1px solid #ccc; border-radius:var(--radius); }
+    h1,h2,h3 { margin-bottom:.5rem; }
+    .container { max-width:1024px; margin:2rem auto; padding:0 var(--gap); }
 
-  // Initialize user profile
-  function initializeUser() {
-    const userRef = db.collection('users').doc(currentUser.uid);
-    userRef.get().then(doc => {
-      if (!doc.exists) {
-        userRef.set({
-          name: currentUser.displayName,
-          email: currentUser.email,
-          coins: 500,
-          status: 'Free',
-          totalAdBudget: 0,
-          youtubeWatchedMinutes: 0,
-          lastLogin: new Date()
-        }).then(loadDashboard);
-      } else {
-        loadDashboard();
-      }
-    });
-  }
+    /* ─── Layout ─────────────────────────────────────────────── */
+    nav { display:flex; gap:var(--gap); flex-wrap:wrap; margin-bottom:2rem; }
+    section { background:var(--white); padding:var(--gap); border-radius:var(--radius); margin-bottom:var(--gap); }
+    .flex { display:flex; gap:var(--gap); flex-wrap:wrap; }
+    .iframe-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; margin-top:1rem; }
+    .iframe-grid iframe { width:100%; height:180px; border:1px solid #ddd; border-radius:4px; }
 
-  // Load user data into dashboard
-function loadDashboard() {
-  document.getElementById('loginPrompt').classList.add('hidden');
-  dashboard.classList.remove('hidden');
+    /* ─── Modal ──────────────────────────────────────────────── */
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:center; justify-content:center; }
+    .modal { background:var(--white); padding:2rem; border-radius:var(--radius); max-width:320px; text-align:center; }
+    .modal-backdrop.show { display:flex; }
+    .close-modal { position:absolute; top:1rem; right:1rem; background:none; font-size:1.2rem; cursor:pointer; }
 
-  const userRef = db.collection('users').doc(currentUser.uid);
-  userRef.get().then(doc => {
-    const data = doc.data();
-    userNameSpan.innerText = data.name;
-    userEmailSpan.innerText = data.email;
-    userCoinsSpan.innerText = data.coins;
-    userStatusSpan.innerText = data.status;
-    profileNameInput.value = data.name;
-    profilePremiumCheckbox.checked = data.status === 'Premium';
-  });
-}
+    /* ─── Utility ───────────────────────────────────────────── */
+    .hidden { display:none !important; }
+    .mt { margin-top:var(--gap); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ad4U — Earn Coins by Watching Ads</h1>
+    <!-- Dashboard + Launch -->
+    <section>
+      <h2>Dashboard</h2>
+      <p>Your Coins: <strong id="coinCount">0</strong></p>
+      <h3>Launch Your Ad</h3>
+      <form id="launchForm" class="flex">
+        <label>Type:
+          <select id="adType">
+            <option value="traffic">Website Traffic</option>
+            <option value="watchtime">YouTube Watchtime</option>
+            <option value="views">YouTube Views</option>
+            <option value="direct">Direct Link</option>
+          </select>
+        </label>
+        <label>Target URL / Video ID:
+          <input type="text" id="adTarget" placeholder="http://... or Uw9bqrrV-yI" required>
+        </label>
+        <label>Budget (coins):
+          <input type="number" id="adBudget" min="100" value="1000" required>
+        </label>
+        <button type="submit">Launch (15% fee)</button>
+      </form>
+    </section>
 
-// Coin reward for watching ad
-document.getElementById('earnCoinsBtn').onclick = () => {
-  alert('Watching ad...');
-  const userRef = db.collection('users').doc(currentUser.uid);
-  userRef.update({ coins: firebase.firestore.FieldValue.increment(100) }).then(loadDashboard);
-};
+    <!-- Navigation -->
+    <nav>
+      <a href="#traffic">Website Traffic</a>
+      <a href="#watchtime">YouTube Watchtime</a>
+      <a href="#views">YouTube Views</a>
+      <a href="#direct">Direct Links</a>
+    </nav>
 
-// Launch ad with budget deduction
-document.getElementById('launchAdBtn').onclick = () => {
-  const budget = prompt('Enter ad budget (coins):', '1000');
-  if (budget && !isNaN(budget)) {
-    const userRef = db.collection('users').doc(currentUser.uid);
-    userRef.update({ totalAdBudget: firebase.firestore.FieldValue.increment(parseInt(budget)) }).then(() => {
-      alert('Ad launched with budget: ' + budget);
-    });
-  }
-};
+    <!-- 1. Website Traffic -->
+    <section id="traffic">
+      <h2>Website Traffic Ads</h2>
+      <button id="singleT">Watch 1 Ad</button>
+      <button id="multiT">Watch Multiple</button>
+      <div id="promptT" class="mt hidden">
+        <label>How many? <input id="countT" type="number" min="1" value="3"></label>
+        <button id="startMultiT">Start</button>
+      </div>
+      <div id="iframesT" class="iframe-grid mt"></div>
+    </section>
 
-// Profile update
-document.getElementById('updateProfile').onclick = () => {
-  const newName = profileNameInput.value;
-  const isPremium = profilePremiumCheckbox.checked;
-  const status = isPremium ? 'Premium' : 'Free';
-  const userRef = db.collection('users').doc(currentUser.uid);
-  userRef.update({ name: newName, status: status }).then(() => {
-    alert('Profile updated');
-    loadDashboard();
-  });
-};
+    <!-- 2. YouTube Watchtime -->
+    <section id="watchtime">
+      <h2>YouTube Watchtime Ads</h2>
+      <button id="singleW">Watch 1 Video</button>
+      <button id="multiW">Watch Multiple</button>
+      <div id="promptW" class="mt hidden">
+        <label>How many? <input id="countW" type="number" min="1" value="2"></label>
+        <button id="startMultiW">Start</button>
+      </div>
+      <div id="iframesW" class="iframe-grid mt"></div>
+    </section>
 
-// Load Traffic Ads
-document.getElementById('loadTrafficAds').onclick = () => {
-  const container = document.getElementById('trafficAdsContainer');
-  container.innerHTML = '';
-  for (let i=0; i<3; i++) {
-    const iframe = document.createElement('iframe');
-    iframe.src = 'https://example.com'; // replace with actual ad URL
-    iframe.className='w-full h-48 border rounded';
-    container.appendChild(iframe);
-  }
-};
+    <!-- 3. YouTube Views -->
+    <section id="views">
+      <h2>YouTube View Ads</h2>
+      <button id="singleV">Watch 1 View</button>
+      <button id="multiV">Watch Multiple</button>
+      <div id="promptV" class="mt hidden">
+        <label>How many? <input id="countV" type="number" min="1" value="4"></label>
+        <button id="startMultiV">Start</button>
+      </div>
+      <div id="iframesV" class="iframe-grid mt"></div>
+    </section>
 
-// Watch YouTube video
-document.getElementById('loadYoutube').onclick = () => {
-  const container = document.getElementById('youtubeContainer');
-  container.innerHTML = '';
-  const iframe = document.createElement('iframe');
-  iframe.src='https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1';
-  iframe.width='560';
-  iframe.height='315';
-  iframe.allow='autoplay; encrypted-media';
-  container.appendChild(iframe);
-  // Add coins after 1 min
-  setTimeout(() => {
-    const userRef = db.collection('users').doc(currentUser.uid);
-    userRef.update({ coins: firebase.firestore.FieldValue.increment(100) });
-  }, 60000);
-};
+    <!-- 4. Direct Links -->
+    <section id="direct">
+      <h2>Direct Link Ads</h2>
+      <div id="linkContainer" class="mt flex"></div>
+    </section>
+  </div>
 
-// Show links
-document.getElementById('showLinks').onclick = () => {
-  const container = document.getElementById('linksContainer');
-  container.innerHTML = '';
-  const links=['https://otieu.com/4/9677163','https://otieu.com/4/9677163'];
-  links.forEach(link => {
-    const a = document.createElement('a');
-    a.href=link;
-    a.target='_blank';
-    a.innerText='Visit Link (200 coins)';
-    a.className='block mb-2 text-blue-600 hover:underline';
-    a.onclick=() => {
-      if(confirm('Clicking this will deduct 200 coins. Continue?')){
-        const userRef= db.collection('users').doc(currentUser.uid);
-        userRef.update({ coins: firebase.firestore.FieldValue.increment(-200) });
-      }
+  <!-- Premium Modal -->
+  <div id="premiumModal" class="modal-backdrop">
+    <div class="modal">
+      <button class="close-modal" onclick="closeModal()">×</button>
+      <h3>Upgrade to Premium</h3>
+      <p>Daily multi-watch limit reached. Get unlimited access by subscribing.</p>
+      <a href="https://wa.me/923330737987" target="_blank">
+        <button>Contact on WhatsApp</button>
+      </a>
+    </div>
+  </div>
+
+  <script>
+  (()=>{
+    // ─── Helpers & Data ──────────────────────────────────────
+    const COIN_KEY='ad4u_coins', ADS_KEY='ad4u_ads', MULTI_KEY='ad4u_multi';
+    let coins = +localStorage.getItem(COIN_KEY) || 0;
+    let ads   = JSON.parse(localStorage.getItem(ADS_KEY) || '[]');
+    let multi = JSON.parse(localStorage.getItem(MULTI_KEY) || '{}');
+
+    function save(){ 
+      localStorage.setItem(COIN_KEY, coins);
+      localStorage.setItem(ADS_KEY, JSON.stringify(ads));
+      localStorage.setItem(MULTI_KEY, JSON.stringify(multi));
+      renderDashboard();
+    }
+    function renderDashboard(){
+      document.getElementById('coinCount').textContent = coins;
+    }
+    function randomAd(type){
+      const list = ads.filter(a=>a.type===type && a.budget>=getCost(type));
+      return list.length? list[Math.floor(Math.random()*list.length)] : null;
+    }
+    function getCost(type){
+      if(type==='traffic') return 100;
+      if(type==='watchtime') return 100;
+      if(type==='views') return 10;
+      if(type==='direct') return 200;
+      return 0;
+    }
+    function removeEmpty(){
+      ads = ads.filter(a=>a.budget>=getCost(a.type));
+    }
+
+    // ─── Launch Ad ────────────────────────────────────────────
+    document.getElementById('launchForm').onsubmit = e=>{
+      e.preventDefault();
+      let type   = e.target.adType.value;
+      let target = e.target.adTarget.value.trim();
+      let budget = Math.max(0, +e.target.adBudget.value * .85); // 15% fee
+      if(!target||budget<getCost(type)) return alert('Invalid');
+      ads.push({ id:Date.now(), type, target, budget });
+      save();
+      e.target.reset();
     };
-    container.appendChild(a);
-  });
-};
 
-</script>
+    // ─── Multi Limit ──────────────────────────────────────────
+    function canMulti(useSec){
+      let today = new Date().toISOString().slice(0,10);
+      if(multi.date!==today){ multi={date:today, used:0}; }
+      if(multi.used+useSec>120) return false;
+      multi.used += useSec;
+      save();
+      return true;
+    }
+
+    // ─── Single & Multi Watch Template ───────────────────────
+    function watchAd(type, container){
+      let ad = randomAd(type);
+      if(!ad) return alert('No active ads');
+      let cost = getCost(type);
+      let frame = document.createElement('iframe');
+      if(type==='traffic'){
+        frame.src = ad.target;
+      } else if(type==='watchtime'||type==='views'){
+        let isVideo = type!=='traffic';
+        let id = type==='direct'?ad.target:ad.target;
+        frame.src = (type!=='traffic')
+          ?`https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=0`
+          :ad.target;
+      }
+      container.innerHTML=''; container.appendChild(frame);
+      let dur = type==='traffic'?30: (type==='watchtime'?60:30);
+      let t=0, iv = setInterval(()=>{
+        t++;
+        if(t>=dur){
+          clearInterval(iv);
+          coins += cost;
+          ad.budget -= cost;
+          removeEmpty(); save();
+          container.innerHTML='';
+        }
+      },1000);
+    }
+
+    function multiWatch(type, n, container){
+      if(!canMulti( n*(type==='traffic'?30:(type==='watchtime'?60:30)) ))
+        return showModal();
+      container.innerHTML='';
+      for(let i=0;i<n;i++){
+        let slot = document.createElement('div');
+        slot.style.position='relative'; slot.style.height='180px';
+        let frame = document.createElement('iframe');
+        frame.style.width='100%'; frame.style.height='100%'; frame.style.border='1px solid #ddd';
+        let ad = randomAd(type);
+        if(!ad) continue;
+        if(type==='traffic') frame.src=ad.target;
+        else frame.src = `https://www.youtube.com/embed/${ad.target}?autoplay=1&mute=1&controls=0`;
+        slot.appendChild(frame);
+        container.appendChild(slot);
+        (()=>{
+          let cost = getCost(type);
+          let dur = type==='traffic'?30:(type==='watchtime'?60:30);
+          let t=0, iv=setInterval(()=>{
+            t++;
+            if(t>=dur){
+              clearInterval(iv);
+              coins+=cost; ad.budget-=cost;
+              removeEmpty(); save();
+              slot.remove();
+            }
+          },1000);
+        })();
+      }
+    }
+
+    // ─── Direct Links ────────────────────────────────────────
+    function renderDirect(){
+      let out = document.getElementById('linkContainer');
+      out.innerHTML='';
+      ads.filter(a=>a.type==='direct'&&a.budget>=200).forEach(ad=>{
+        let btn = document.createElement('button');
+        btn.textContent = 'Open & Earn 200';
+        btn.onclick = ()=>{
+          window.open(ad.target,'_blank');
+          setTimeout(()=>{
+            coins+=200; ad.budget-=200; removeEmpty(); save();
+            renderDirect();
+          },15000);
+        };
+        out.appendChild(btn);
+      });
+    }
+
+    // ─── Modal Controls ──────────────────────────────────────
+    function showModal(){ document.getElementById('premiumModal').classList.add('show') }
+    window.closeModal = ()=>{ document.getElementById('premiumModal').classList.remove('show') }
+
+    // ─── Wire Up Buttons ─────────────────────────────────────
+    document.getElementById('singleT').onclick = ()=>watchAd('traffic', document.getElementById('iframesT'));
+    document.getElementById('multiT').onclick  = ()=>{ document.getElementById('promptT').classList.remove('hidden'); };
+    document.getElementById('startMultiT').onclick = ()=>{
+      let n=+document.getElementById('countT').value||1;
+      multiWatch('traffic', n, document.getElementById('iframesT'));
+      document.getElementById('promptT').classList.add('hidden');
+    };
+
+    document.getElementById('singleW').onclick = ()=>watchAd('watchtime', document.getElementById('iframesW'));
+    document.getElementById('multiW').onclick  = ()=>{ document.getElementById('promptW').classList.remove('hidden'); };
+    document.getElementById('startMultiW').onclick = ()=>{
+      let n=+document.getElementById('countW').value||1;
+      multiWatch('watchtime', n, document.getElementById('iframesW'));
+      document.getElementById('promptW').classList.add('hidden');
+    };
+
+    document.getElementById('singleV').onclick = ()=>watchAd('views', document.getElementById('iframesV'));
+    document.getElementById('multiV').onclick  = ()=>{ document.getElementById('promptV').classList.remove('hidden'); };
+    document.getElementById('startMultiV').onclick = ()=>{
+      let n=+document.getElementById('countV').value||1;
+      multiWatch('views', n, document.getElementById('iframesV'));
+      document.getElementById('promptV').classList.add('hidden');
+    };
+
+    // ─── Init ────────────────────────────────────────────────
+    renderDashboard();
+    renderDirect();
+  })();
+  </script>
 </body>
 </html>
