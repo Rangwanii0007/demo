@@ -1,628 +1,293 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Ad-4-U — Earn Coins</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="referrer" content="no-referrer" />
-<style>
-:root{--accent:#06b6d4;--bg:#071426;--muted:#98a8b8}
-*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-body{margin:0;background:linear-gradient(180deg,#041426,#07122a);color:#eaf6fb;min-height:100vh}
-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,0.02);position:sticky;top:0;z-index:50}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#0ea5a4);display:flex;align-items:center;justify-content:center;color:#022;font-weight:800}
-nav a{color:inherit;text-decoration:none;margin-right:8px;padding:6px;border-radius:8px;cursor:pointer;font-weight:600}
-.container{max-width:1100px;margin:18px auto;padding:12px}
-.card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:14px;border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);margin-bottom:14px}
-input,select,button,textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit}
-.btn{background:var(--accent);color:#022;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
-.outline{background:transparent;border:1px solid rgba(255,255,255,0.06)}
-.small{color:var(--muted);font-size:.95rem}
-iframe{border:0;border-radius:8px}
-.pill{background:rgba(255,255,255,0.02);padding:.4rem .6rem;border-radius:999px}
-.hidden{display:none}
-.grid{display:grid;gap:12px}
-@media (min-width:980px){.cols-3{grid-template-columns:1fr 420px}}
-@media (max-width:980px){nav{display:none}}
-.notice{background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;color:var(--muted);margin-bottom:8px}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pro Ad Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
-<body>
-  <header>
-    <div class="brand">
-      <div class="logo">A4U</div>
-      <div><div style="font-weight:800">Ad-4-U</div><div class="small">Watch ads • Earn coins • Launch campaigns</div></div>
-    </div>
+<body class="bg-gray-100 font-sans text-gray-700">
 
-    <nav id="main-nav">
-      <a data-page="dashboard">Dashboard</a>
-      <a data-page="traffic">Website Traffic</a>
-      <a data-page="watchtime">YouTube Watchtime</a>
-      <a data-page="views">YouTube Views</a>
-      <a data-page="direct">Direct Links</a>
-      <a data-page="account">Account</a>
-      <a data-page="leaderboard">Leaderboard</a>
-    </nav>
+<!-- HEADER -->
+<header class="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg sticky top-0 z-50">
+  <h1 class="text-2xl font-bold">Pro Ad Platform</h1>
+  <button id="loginBtn" class="bg-white text-gray-900 px-4 py-2 rounded hover:bg-gray-200">Login with Google</button>
+</header>
 
-    <div style="display:flex;gap:10px;align-items:center">
-      <div class="small" id="user-email">Not signed</div>
-      <button id="btn-open-auth" class="btn outline">Sign in / Register</button>
-      <button id="btn-signout" class="btn hidden">Sign out</button>
-    </div>
-  </header>
+<!-- MAIN CONTENT -->
+<div class="container mx-auto p-4 space-y-4">
 
-  <main class="container">
-    <!-- AUTH PANEL -->
-    <div id="auth-panel" class="card">
-      <div style="display:flex;gap:18px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <h3>Create account</h3>
-          <div class="small">Full name, Gmail, password. Optionally open site with <code>?ref=UID</code> to refer.</div>
-          <div style="margin-top:10px;display:grid;gap:8px">
-            <input id="fullName" placeholder="Full name" />
-            <input id="regEmail" placeholder="Gmail (email)" type="email"/>
-            <input id="regPass" placeholder="Password (min 6)" type="password"/>
-            <input id="regPassC" placeholder="Confirm password" type="password"/>
-            <div style="display:flex;gap:8px">
-              <button id="btn-register" class="btn">Create account</button>
-              <button id="btn-to-login" class="btn outline">Go to Login</button>
-            </div>
-            <div id="reg-msg" class="small"></div>
-          </div>
-        </div>
-
-        <div style="width:360px;min-width:240px">
-          <h3>Sign in</h3>
-          <div style="display:grid;gap:8px">
-            <input id="loginEmail" placeholder="Email" type="email"/>
-            <input id="loginPass" placeholder="Password" type="password"/>
-            <div style="display:flex;gap:8px">
-              <button id="btn-login" class="btn">Sign in</button>
-              <button id="btn-to-register2" class="btn outline">Go to Register</button>
-            </div>
-            <div class="small notice">Referral bonus: both referrer & referred get <strong>500 coins</strong> (applied at signup)</div>
-          </div>
-        </div>
+  <!-- Authenticated Dashboard -->
+  <div id="dashboard" class="hidden bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto space-y-4">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2 class="text-xl font-semibold mb-2">Welcome, <span id="userName" class="font-bold"></span></h2>
+        <p class="mb-1">Email: <span id="userEmail"></span></p>
+        <p class="mb-1">Coins: <span id="userCoins" class="text-green-500 font-semibold"></span></p>
+        <p class="mb-1">Status: <span id="userStatus" class="font-semibold"></span></p>
+      </div>
+      <div class="flex space-x-2">
+        <button id="earnCoinsBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Watch Ad (+100 coins)</button>
+        <button id="launchAdBtn" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">Launch Ad</button>
       </div>
     </div>
 
-    <!-- APP -->
-    <div id="app" class="hidden">
-      <div class="grid cols-3">
-        <div class="card">
-          <h3>Dashboard</h3>
-          <div class="small">Balance: <strong id="balance">0</strong> coins</div>
-          <div class="small">Status: <span id="status-pill" class="pill">Free</span></div>
-          <div style="margin-top:8px">
-            <label class="small">Referral link</label>
-            <div class="pill small" id="my-ref">—</div>
-          </div>
-
-          <hr style="margin:12px 0;border:none;height:1px;background:rgba(255,255,255,0.04)">
-
-          <div>
-            <h4>Create Ad</h4>
-            <div style="display:grid;gap:8px">
-              <input id="ad-url" placeholder="Ad URL (https://... or youtube link)" />
-              <input id="ad-budget" placeholder="Budget (coins) e.g. 10000" />
-              <select id="ad-type">
-                <option value="site">Website Traffic (100 coins / 30s)</option>
-                <option value="yt">YouTube Watchtime (100 coins / min)</option>
-                <option value="views">YouTube Views (10 coins / view)</option>
-                <option value="direct">Direct Link (200 coins / click)</option>
-              </select>
-              <div style="display:flex;gap:8px">
-                <button id="create-ad" class="btn">Launch Ad (15% fee)</button>
-                <button id="reset-ad" class="btn outline">Reset</button>
-              </div>
-              <div id="create-ad-msg" class="small"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="grid-column:span 2">
-          <div id="page-root"><!-- pages render here --></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h4>Active Campaigns</h4>
-        <div id="active-ads" class="small">Loading...</div>
-      </div>
+    <!-- Navigation Buttons -->
+    <div class="flex flex-wrap gap-2 mt-4">
+      <button class="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded" data-section="traffic">Traffic Ads</button>
+      <button class="w-full md:w-auto bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" data-section="youtube">YouTube Watch</button>
+      <button class="w-full md:w-auto bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded" data-section="views">YouTube Views</button>
+      <button class="w-full md:w-auto bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded" data-section="links">Direct Links</button>
+      <button class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded" data-section="profile">Profile Settings</button>
     </div>
 
-    <footer style="margin-top:12px" class="small card">No Cloud Functions • Works on free Firebase plan • Premium via WhatsApp: +92 3330737987</footer>
-  </main>
+    <!-- Sections -->
+    <div class="mt-4">
 
-  <!-- Firebase compat SDK (works in Blogger) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+      <!-- Traffic Ads -->
+      <div id="section-traffic" class="hidden">
+        <h3 class="text-lg font-semibold mb-2">Traffic Ads</h3>
+        <button id="loadTrafficAds" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded mb-2">Load Traffic Ads</button>
+        <div id="trafficAdsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+      </div>
 
-  <script>
-  /*************************************************************************
-   * Full single-page app (client-side) using Firebase Auth + Firestore.
-   * All coin + ad budget math is done via Firestore transactions triggered by client.
-   *
-   * NOTE:
-   * - This is fully functional without Cloud Functions.
-   * - Transactions are atomic, but because they are called from client code,
-   *   a malicious user could attempt to manipulate actions. For real production,
-   *   move sensitive logic server-side (Cloud Functions).
-   *************************************************************************/
+      <!-- YouTube Watch -->
+      <div id="section-youtube" class="hidden">
+        <h3 class="text-lg font-semibold mb-2">Watch YouTube Video</h3>
+        <button id="loadYoutube" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mb-2">Watch Video (1 min)</button>
+        <div id="youtubeContainer" class="mt-4"></div>
+      </div>
 
-  // ----------------- Firebase config (from your provided details) -----------------
+      <!-- YouTube Views -->
+      <div id="section-views" class="hidden">
+        <h3 class="text-lg font-semibold mb-2">YouTube Views</h3>
+        <button id="loadViews" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded mb-2">Show Videos</button>
+        <div id="viewsContainer" class="space-y-4"></div>
+      </div>
+
+      <!-- Direct Links -->
+      <div id="section-links" class="hidden">
+        <h3 class="text-lg font-semibold mb-2">Direct Links</h3>
+        <button id="showLinks" class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded mb-2">Show Links</button>
+        <div id="linksContainer" class="space-y-2"></div>
+      </div>
+
+      <!-- Profile Settings -->
+      <div id="section-profile" class="hidden border-t pt-4 space-y-4">
+        <h3 class="text-lg font-semibold mb-2">Profile Settings</h3>
+        <label class="block mb-2">Name:
+          <input type="text" id="profileName" class="w-full border rounded px-3 py-2" />
+        </label>
+        <label class="block mb-2 flex items-center space-x-2">
+          <input type="checkbox" id="profilePremium" />
+          <span>Premium User</span>
+        </label>
+        <button id="updateProfile" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Update Profile</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Login Prompt (before login) -->
+  <div id="loginPrompt" class="max-w-xl mx-auto p-4 bg-white rounded-lg shadow-lg text-center hidden">
+    <h2 class="text-xl font-semibold mb-4">Please Login to Continue</h2>
+    <button id="loginGoogle" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">Login with Google</button>
+  </div>
+
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+
+<script>
+  // Initialize Firebase (replace with your config)
   const firebaseConfig = {
-    apiKey: "AIzaSyAnu49G3ZZaMhRAYwoBPKfcRoj7sfcu5E8",
-    authDomain: "ad-4-u.firebaseapp.com",
-    projectId: "ad-4-u",
-    storageBucket: "ad-4-u.firebasestorage.app",
-    messagingSenderId: "775864010731",
-    appId: "1:775864010731:web:ea8a2ff4f772ca80ac3bae",
-    measurementId: "G-3R9DDSM2XK"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
 
-  // ----------------- UI helpers -----------------
-  const $ = id => document.getElementById(id);
-  const pages = {
-    dashboard: dashboardHTML,
-    traffic: trafficHTML,
-    watchtime: watchtimeHTML,
-    views: viewsHTML,
-    direct: directHTML,
-    account: accountHTML,
-    leaderboard: leaderboardHTML
-  };
-
-  document.querySelectorAll('nav a').forEach(a => a.addEventListener('click', () => {
-    const p = a.getAttribute('data-page'); if(p) showPage(p);
-  }));
-
-  $('btn-open-auth').addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
-  $('btn-signout').addEventListener('click', ()=> auth.signOut());
-
-  // ----------------- AUTH: register / login -----------------
-  $('btn-register').addEventListener('click', async ()=>{
-    const name = $('fullName').value.trim();
-    const email = $('regEmail').value.trim();
-    const pw = $('regPass').value;
-    const pwc = $('regPassC').value;
-    const refFromUrl = (new URLSearchParams(window.location.search)).get('ref') || null;
-    if(!name || !email || pw.length < 6){ $('reg-msg').innerText = 'Complete fields and use password >=6'; return; }
-    if(pw !== pwc){ $('reg-msg').innerText = 'Passwords do not match'; return; }
-    try{
-      const cred = await auth.createUserWithEmailAndPassword(email, pw);
-      await cred.user.updateProfile({ displayName: name });
-      // create user doc
-      await db.collection('users').doc(cred.user.uid).set({
-        name, email, coins: 0, premium:false,
-        multiple_used_today: 0,
-        multiple_last_date: null,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        referredBy: refFromUrl || null
-      });
-      // referral credit (client-side transaction): credit both 500 if ref exists
-      if(refFromUrl){
-        try{
-          await db.runTransaction(async tx => {
-            const refRef = db.collection('users').doc(refFromUrl);
-            const myRef = db.collection('users').doc(cred.user.uid);
-            const rSnap = await tx.get(refRef);
-            const mSnap = await tx.get(myRef);
-            if(!rSnap.exists || !mSnap.exists) return;
-            tx.update(refRef, { coins: (rSnap.data().coins || 0) + 500 });
-            tx.update(myRef, { coins: (mSnap.data().coins || 0) + 500 });
-            // log transaction doc
-            tx.set(db.collection('transactions').doc(), { type:'referral', referrer: refFromUrl, newUser: cred.user.uid, amount:500, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-          });
-        }catch(e){ console.warn('Referral tx error', e); }
-      }
-      $('reg-msg').innerText = 'Account created and signed in.';
-    }catch(e){ $('reg-msg').innerText = 'Register error: ' + e.message; }
-  });
-
-  $('btn-login').addEventListener('click', async ()=>{
-    const e = $('loginEmail').value.trim(), p = $('loginPass').value;
-    try{ await auth.signInWithEmailAndPassword(e,p); }catch(err){ alert('Login error: '+err.message); }
-  });
-
-  // ----------------- Auth state listener -----------------
   let currentUser = null;
-  auth.onAuthStateChanged(async user => {
-    currentUser = user;
-    if(user){
-      $('user-email').innerText = user.email;
-      $('btn-open-auth').classList.add('hidden'); $('btn-signout').classList.remove('hidden');
-      $('auth-panel').classList.add('hidden'); $('app').classList.remove('hidden');
-      await loadUser(); await renderActiveAds(); showPage('dashboard');
+
+  // Elements
+  const loginBtn = document.getElementById('loginGoogle');
+  const loginPrompt = document.getElementById('loginPrompt');
+  const dashboard = document.getElementById('dashboard');
+
+  const userNameSpan = document.getElementById('userName');
+  const userEmailSpan = document.getElementById('userEmail');
+  const userCoinsSpan = document.getElementById('userCoins');
+  const userStatusSpan = document.getElementById('userStatus');
+
+  const profileNameInput = document.getElementById('profileName');
+  const profilePremiumCheckbox = document.getElementById('profilePremium');
+
+  // Sections
+  const sections = {
+    traffic: document.getElementById('section-traffic'),
+    youtube: document.getElementById('section-youtube'),
+    views: document.getElementById('section-views'),
+    links: document.getElementById('section-links'),
+    profile: document.getElementById('section-profile')
+  };
+
+  // Show/hide sections
+  document.querySelectorAll('button[data-section]').forEach(btn => {
+    btn.onclick = () => {
+      Object.values(sections).forEach(sec => sec.classList.add('hidden'));
+      const target = btn.dataset.section;
+      sections[target].classList.remove('hidden');
+    };
+  });
+
+  // Login
+  document.getElementById('loginGoogle').onclick = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(res => {
+      currentUser = res.user;
+      initializeUser();
+    });
+  };
+
+  // Check auth state
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      currentUser = user;
+      initializeUser();
     } else {
-      $('user-email').innerText = 'Not signed';
-      $('btn-open-auth').classList.remove('hidden'); $('btn-signout').classList.add('hidden');
-      $('auth-panel').classList.remove('hidden'); $('app').classList.add('hidden');
-      showPage('dashboard');
+      loginPrompt.classList.remove('hidden');
+      dashboard.classList.add('hidden');
     }
   });
 
-  // ----------------- Load user helper -----------------
-  async function loadUser(){
-    if(!currentUser) return;
-    const snap = await db.collection('users').doc(currentUser.uid).get();
-    if(!snap.exists) return;
-    const data = snap.data();
-    $('balance').innerText = data.coins || 0;
-    $('status-pill').innerText = data.premium ? 'Premium' : 'Free';
-    $('my-ref').innerText = location.origin + location.pathname + '?ref=' + currentUser.uid;
-  }
-
-  // ----------------- Render active ads -----------------
-  async function renderActiveAds(){
-    const container = $('active-ads');
-    const snap = await db.collection('ads').get();
-    const list = snap.docs.map(d=>({id:d.id, ...d.data()})).filter(a=>!a.closed);
-    if(list.length === 0){ container.innerText = 'No active campaigns'; return; }
-    container.innerHTML = list.map(a => `<div style="margin-bottom:6px" class="small">${a.type} — ${a.url} — remaining: ${a.remaining}</div>`).join('');
-  }
-
-  // ----------------- Create ad (client-run transaction) -----------------
-  $('create-ad').addEventListener('click', async ()=>{
-    if(!currentUser) return alert('Sign in first');
-    const url = $('ad-url').value.trim();
-    let budget = parseInt($('ad-budget').value||'0');
-    const type = $('ad-type').value;
-    if(!url || !budget || budget <= 0){ $('create-ad-msg').innerText = 'Provide valid URL and budget'; return; }
-    const fee = Math.floor(budget * 0.15);
-    const total = budget + fee;
+  // Initialize user profile
+  function initializeUser() {
     const userRef = db.collection('users').doc(currentUser.uid);
-    try{
-      await db.runTransaction(async tx => {
-        const uSnap = await tx.get(userRef);
-        if(!uSnap.exists) throw new Error('User not found');
-        const coins = uSnap.data().coins || 0;
-        if(coins < total) throw new Error('Insufficient balance');
-        tx.update(userRef, { coins: coins - total });
-        const adRef = db.collection('ads').doc();
-        tx.set(adRef, {
-          owner: currentUser.uid,
-          ownerEmail: uSnap.data().email || currentUser.email,
-          type, url, budget, remaining: budget,
-          costPer: (type === 'views' ? 10 : (type === 'direct' ? 200 : (type === 'yt' ? 100 : 100))),
-          closed: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        tx.set(db.collection('transactions').doc(), { type:'create_ad', user: currentUser.uid, budget, fee, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-      });
-      $('create-ad-msg').innerText = 'Ad launched (15% fee deducted)';
-      await loadUser(); await renderActiveAds();
-    }catch(e){ $('create-ad-msg').innerText = 'Launch error: ' + (e.message || e); }
+    userRef.get().then(doc => {
+      if (!doc.exists) {
+        userRef.set({
+          name: currentUser.displayName,
+          email: currentUser.email,
+          coins: 500,
+          status: 'Free',
+          totalAdBudget: 0,
+          youtubeWatchedMinutes: 0,
+          lastLogin: new Date()
+        }).then(loadDashboard);
+      } else {
+        loadDashboard();
+      }
+    });
+  }
+
+  // Load user data into dashboard
+function loadDashboard() {
+  document.getElementById('loginPrompt').classList.add('hidden');
+  dashboard.classList.remove('hidden');
+
+  const userRef = db.collection('users').doc(currentUser.uid);
+  userRef.get().then(doc => {
+    const data = doc.data();
+    userNameSpan.innerText = data.name;
+    userEmailSpan.innerText = data.email;
+    userCoinsSpan.innerText = data.coins;
+    userStatusSpan.innerText = data.status;
+    profileNameInput.value = data.name;
+    profilePremiumCheckbox.checked = data.status === 'Premium';
   });
+}
 
-  // ----------------- Page HTML templates -----------------
-  function dashboardHTML(){
-    return `<div><h3>Dashboard</h3><div class="small">Balance: <strong id="dash-balance">${currentUser ? '...' : '0'}</strong></div><div id="dash-campaigns" class="small" style="margin-top:8px">Loading campaigns...</div></div>`;
-  }
-  function trafficHTML(){
-    return `<div><h3>Website Traffic</h3>
-      <div class="small">Earn <strong>100 coins</strong> per completed 30s view. Multiple iframes available (1–10). Free multiple-iframe session: 2 minutes/day.</div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <label class="small">Iframes</label><input id="traffic-count" type="number" min="1" max="10" value="1" style="width:80px"/><button id="traffic-start" class="btn">Open</button><button id="traffic-stop" class="btn outline">Close</button>
-      </div>
-      <div id="traffic-grid" style="margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-    </div>`;
-  }
-  function watchtimeHTML(){
-    return `<div><h3>YouTube Watchtime</h3>
-      <div class="small">Earn <strong>100 coins</strong> per minute while the iframe is visible and timer runs.</div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <label class="small">Players</label><input id="watchtime-count" type="number" min="1" max="10" value="1" style="width:80px"/><button id="watchtime-start" class="btn">Open</button><button id="watchtime-stop" class="btn outline">Close</button>
-      </div>
-      <div id="watchtime-grid" style="margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-    </div>`;
-  }
-  function viewsHTML(){
-    return `<div><h3>YouTube Views</h3>
-      <div class="small">Earn <strong>10 coins</strong> per view (15s).</div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-        <label class="small">Players</label><input id="views-count" type="number" min="1" max="10" value="1" style="width:80px"/><button id="views-start" class="btn">Open</button><button id="views-stop" class="btn outline">Close</button>
-      </div>
-      <div id="views-grid" style="margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-    </div>`;
-  }
-  function directHTML(){
-    return `<div><h3>Direct Links</h3><div class="small">Click a link, wait 15s, earn <strong>200 coins</strong>. Link hides after click.</div><div id="direct-list" style="margin-top:10px"></div></div>`;
-  }
-  function accountHTML(){
-    return `<div><h3>Account</h3><div class="small">Name: <span id="acct-name">—</span></div><div class="small">Email: <span id="acct-email">—</span></div>
-      <div style="margin-top:8px"><label class="small">Change display name</label><input id="change-name" placeholder="Full name"/><div style="margin-top:8px"><button id="save-name" class="btn">Save</button></div></div>
-      <div style="margin-top:12px"><label class="small">Free or Premium</label><div style="display:flex;gap:8px;margin-top:6px"><button id="choose-free" class="btn outline">Free</button><button id="choose-premium" class="btn">Premium (WhatsApp)</button></div></div>
-    </div>`;
-  }
-  function leaderboardHTML(){
-    return `<div><h3>Leaderboard</h3><div id="leaderboard-list" class="small">Loading...</div></div>`;
-  }
+// Coin reward for watching ad
+document.getElementById('earnCoinsBtn').onclick = () => {
+  alert('Watching ad...');
+  const userRef = db.collection('users').doc(currentUser.uid);
+  userRef.update({ coins: firebase.firestore.FieldValue.increment(100) }).then(loadDashboard);
+};
 
-  // ----------------- Page boots (behavior) -----------------
-  window.boot_dashboard = async function(){
-    if(!currentUser) return;
-    const el = document.getElementById('dash-campaigns');
-    const snap = await db.collection('ads').get();
-    const list = snap.docs.map(d=>({id:d.id, ...d.data()})).filter(a=>!a.closed);
-    el.innerHTML = list.length ? list.map(a=>`<div class="small" style="margin-bottom:6px">${a.type} — ${a.url} — remaining: ${a.remaining}</div>`).join('') : 'No active campaigns';
-    const bal = (await db.collection('users').doc(currentUser.uid).get()).data().coins||0;
-    const bEl = document.getElementById('dash-balance'); if(bEl) bEl.innerText = bal;
-  };
-
-  // helper: daily multiple-iframe allowance (client-side tracked)
-  async function consumeMultipleSeconds(userId, seconds){
-    const uRef = db.collection('users').doc(userId);
-    return db.runTransaction(async tx => {
-      const s = await tx.get(uRef);
-      if(!s.exists) throw 'user not found';
-      const data = s.data();
-      const last = data.multiple_last_date ? data.multiple_last_date.toMillis() : 0;
-      const used = data.multiple_used_today || 0;
-      const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-      if(last < todayStart.getTime()){
-        tx.update(uRef, { multiple_used_today: seconds, multiple_last_date: firebase.firestore.FieldValue.serverTimestamp() });
-        return true;
-      }
-      if((used + seconds) <= 120){
-        tx.update(uRef, { multiple_used_today: used + seconds, multiple_last_date: firebase.firestore.FieldValue.serverTimestamp() });
-        return true;
-      }
-      return false;
+// Launch ad with budget deduction
+document.getElementById('launchAdBtn').onclick = () => {
+  const budget = prompt('Enter ad budget (coins):', '1000');
+  if (budget && !isNaN(budget)) {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    userRef.update({ totalAdBudget: firebase.firestore.FieldValue.increment(parseInt(budget)) }).then(() => {
+      alert('Ad launched with budget: ' + budget);
     });
   }
+};
 
-  // traffic boot
-  window.boot_traffic = async function(){
-    const grid = $('traffic-grid');
-    $('traffic-start').addEventListener('click', async ()=>{
-      if(!currentUser) return alert('Sign in first');
-      const count = Math.min(10, Math.max(1, parseInt($('traffic-count').value||1)));
-      const adsSnap = await db.collection('ads').where('type','==','site').get();
-      const ads = adsSnap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>!a.closed);
-      const approved = ['http://cludymovie.com/','https://newswithsk.com/'];
-      const allowed = await consumeMultipleSeconds(currentUser.uid, 30);
-      if(!allowed){
-        if(confirm('Your free multiple-iframes (2 min/day) are used. Upgrade to Premium?')) window.open('https://wa.me/923330737987?text=' + encodeURIComponent('I want Premium: ' + (currentUser.email||'')));
-        return;
-      }
-      grid.innerHTML = '';
-      for(let i=0;i<count;i++){
-        const ad = ads[i % Math.max(1,ads.length)] || null;
-        const target = ad ? ad.url : approved[i % approved.length];
-        const ifr = document.createElement('iframe');
-        ifr.src = target; ifr.width='100%'; ifr.height='180';
-        const card = document.createElement('div'); card.className='card';
-        card.innerHTML = `<div class="small">Reward: 100 coins / 30s</div><div style="margin-top:8px"></div>`;
-        card.querySelector('div').appendChild(ifr);
-        const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Start';
-        card.appendChild(document.createElement('br')); card.appendChild(btn);
-        grid.appendChild(card);
-        btn.addEventListener('click', async ()=>{
-          btn.disabled = true; btn.innerText = 'Running...';
-          let elapsed=0; const required=30;
-          const t = setInterval(async ()=>{
-            if(document.hidden) return; elapsed++;
-            if(elapsed>=required){
-              clearInterval(t); btn.innerText = 'Done';
-              if(ad){
-                // atomic: deduct from ad.remaining and credit viewer
-                try{
-                  await db.runTransaction(async tx => {
-                    const adRef = db.collection('ads').doc(ad.id);
-                    const uRef = db.collection('users').doc(currentUser.uid);
-                    const adSnap = await tx.get(adRef);
-                    if(!adSnap.exists) throw new Error('Ad not found');
-                    const rem = adSnap.data().remaining || 0;
-                    const cost = adSnap.data().costPer || 100;
-                    if(rem < cost) throw new Error('Ad exhausted');
-                    tx.update(adRef, { remaining: rem - cost, closed: (rem - cost) <= 0 });
-                    const uSnap = await tx.get(uRef);
-                    tx.update(uRef, { coins: (uSnap.data().coins||0) + cost });
-                    tx.set(db.collection('transactions').doc(), { type:'credit_view', adId: ad.id, viewer: currentUser.uid, amount: cost, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                  });
-                  await loadUser(); await renderActiveAds();
-                }catch(e){ console.warn('credit error', e); alert('No reward — ad may be exhausted'); }
-              } else {
-                // system fallback credit
-                try{
-                  await db.runTransaction(async tx => {
-                    const uRef = db.collection('users').doc(currentUser.uid);
-                    const uSnap = await tx.get(uRef);
-                    tx.update(uRef, { coins: (uSnap.data().coins||0) + 100 });
-                    tx.set(db.collection('transactions').doc(), { type:'credit_fallback', viewer: currentUser.uid, amount:100, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                  });
-                  await loadUser();
-                }catch(e){ console.warn(e); }
-              }
-            }
-          },1000);
-        });
-      }
-      setTimeout(()=>{ grid.innerHTML=''; alert('Free multiple-iframe session ended (2 minutes)'); }, 120000);
-    });
-    $('traffic-stop').addEventListener('click', ()=> grid.innerHTML = '');
-  };
+// Profile update
+document.getElementById('updateProfile').onclick = () => {
+  const newName = profileNameInput.value;
+  const isPremium = profilePremiumCheckbox.checked;
+  const status = isPremium ? 'Premium' : 'Free';
+  const userRef = db.collection('users').doc(currentUser.uid);
+  userRef.update({ name: newName, status: status }).then(() => {
+    alert('Profile updated');
+    loadDashboard();
+  });
+};
 
-  // watchtime boot
-  window.boot_watchtime = async function(){
-    const grid = $('watchtime-grid');
-    $('watchtime-start').addEventListener('click', async ()=>{
-      if(!currentUser) return alert('Sign in first');
-      const count = Math.min(10, Math.max(1, parseInt($('watchtime-count').value||1)));
-      const adsSnap = await db.collection('ads').where('type','==','yt').get();
-      const ads = adsSnap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>!a.closed);
-      const yt = 'https://www.youtube.com/embed/Uw9bqrrV-yI?rel=0';
-      const allowed = await consumeMultipleSeconds(currentUser.uid, 60);
-      if(!allowed){ if(confirm('Free multiple used. Upgrade?')) window.open('https://wa.me/923330737987?text='+encodeURIComponent('Premium please')); return; }
-      grid.innerHTML = '';
-      for(let i=0;i<count;i++){
-        const ad = ads[i % Math.max(1,ads.length)] || null;
-        const target = ad ? ad.url : yt;
-        const ifr = document.createElement('iframe'); ifr.src=target; ifr.width='100%'; ifr.height='180'; ifr.allow='autoplay; encrypted-media';
-        const card = document.createElement('div'); card.className='card';
-        card.innerHTML = `<div class="small">Reward: 100 coins / 60s</div><div style="margin-top:8px"></div>`;
-        card.querySelector('div').appendChild(ifr);
-        const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Start';
-        card.appendChild(document.createElement('br')); card.appendChild(btn);
-        grid.appendChild(card);
-        btn.addEventListener('click', async ()=>{
-          btn.disabled=true; btn.innerText='Running...';
-          let elapsed=0; const required=60;
-          const t = setInterval(async ()=>{
-            if(document.hidden) return; elapsed++;
-            if(elapsed>=required){
-              clearInterval(t); btn.innerText='Done';
-              if(ad){
-                try{
-                  await db.runTransaction(async tx => {
-                    const adRef = db.collection('ads').doc(ad.id); const uRef = db.collection('users').doc(currentUser.uid);
-                    const adSnap = await tx.get(adRef); if(!adSnap.exists) throw new Error('Ad not found');
-                    const rem = adSnap.data().remaining || 0; const cost = adSnap.data().costPer || 100;
-                    if(rem < cost) throw new Error('Ad exhausted');
-                    tx.update(adRef, { remaining: rem - cost, closed: (rem - cost) <= 0 });
-                    const uSnap = await tx.get(uRef); tx.update(uRef, { coins: (uSnap.data().coins||0) + cost });
-                    tx.set(db.collection('transactions').doc(), { type:'credit_watch', adId: ad.id, viewer: currentUser.uid, amount: cost, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                  });
-                  await loadUser(); await renderActiveAds();
-                }catch(e){ console.warn(e); alert('No reward — ad may be exhausted'); }
-              } else {
-                try{ await db.runTransaction(async tx => { const uRef = db.collection('users').doc(currentUser.uid); const uSnap = await tx.get(uRef); tx.update(uRef,{ coins:(uSnap.data().coins||0)+100 }); tx.set(db.collection('transactions').doc(), { type:'credit_fallback_watch', viewer: currentUser.uid, amount:100, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }); await loadUser(); }catch(e){console.warn(e);}
-              }
-            }
-          },1000);
-        });
-      }
-      setTimeout(()=>{ grid.innerHTML=''; alert('Free multiple session ended (2 minutes)'); },120000);
-    });
-    $('watchtime-stop').addEventListener('click', ()=> $('watchtime-grid').innerHTML = '');
-  };
-
-  // views boot
-  window.boot_views = async function(){
-    const grid = $('views-grid');
-    $('views-start').addEventListener('click', async ()=>{
-      if(!currentUser) return alert('Sign in first');
-      const count = Math.min(10, Math.max(1, parseInt($('views-count').value||1)));
-      const adsSnap = await db.collection('ads').where('type','==','views').get();
-      const ads = adsSnap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>!a.closed);
-      const yt = 'https://www.youtube.com/embed/Uw9bqrrV-yI?rel=0';
-      const allowed = await consumeMultipleSeconds(currentUser.uid, 15);
-      if(!allowed){ if(confirm('Free multiple used. Upgrade?')) window.open('https://wa.me/923330737987?text='+encodeURIComponent('Premium please')); return; }
-      grid.innerHTML = '';
-      for(let i=0;i<count;i++){
-        const ad = ads[i % Math.max(1,ads.length)] || null;
-        const target = ad ? ad.url : yt;
-        const ifr = document.createElement('iframe'); ifr.src=target; ifr.width='100%'; ifr.height='180'; ifr.allow='autoplay; encrypted-media';
-        const card = document.createElement('div'); card.className='card';
-        card.innerHTML = `<div class="small">Reward: 10 coins / view (15s)</div><div style="margin-top:8px"></div>`;
-        card.querySelector('div').appendChild(ifr);
-        const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Start';
-        card.appendChild(document.createElement('br')); card.appendChild(btn);
-        grid.appendChild(card);
-        btn.addEventListener('click', async ()=>{
-          btn.disabled=true; btn.innerText='Running...';
-          let elapsed=0; const required=15;
-          const t = setInterval(async ()=>{
-            if(document.hidden) return; elapsed++;
-            if(elapsed>=required){
-              clearInterval(t); btn.innerText='Done';
-              if(ad){
-                try{
-                  await db.runTransaction(async tx => {
-                    const adRef = db.collection('ads').doc(ad.id); const uRef = db.collection('users').doc(currentUser.uid);
-                    const adSnap = await tx.get(adRef); if(!adSnap.exists) throw new Error('Ad not found');
-                    const rem = adSnap.data().remaining || 0; const cost = adSnap.data().costPer || 10;
-                    if(rem < cost) throw new Error('Ad exhausted');
-                    tx.update(adRef, { remaining: rem - cost, closed: (rem - cost) <= 0 });
-                    const uSnap = await tx.get(uRef); tx.update(uRef, { coins: (uSnap.data().coins||0) + cost });
-                    tx.set(db.collection('transactions').doc(), { type:'credit_view_short', adId: ad.id, viewer: currentUser.uid, amount: cost, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-                  });
-                  await loadUser(); await renderActiveAds();
-                }catch(e){ console.warn(e); alert('No reward — ad may be exhausted'); }
-              } else {
-                try{ await db.runTransaction(async tx => { const uRef = db.collection('users').doc(currentUser.uid); const uSnap = await tx.get(uRef); tx.update(uRef,{ coins:(uSnap.data().coins||0)+10 }); tx.set(db.collection('transactions').doc(),{ type:'credit_fallback_view', viewer: currentUser.uid, amount:10, createdAt: firebase.firestore.FieldValue.serverTimestamp() }); }); await loadUser(); }catch(e){console.warn(e);}
-              }
-            }
-          },1000);
-        });
-      }
-      setTimeout(()=>{ grid.innerHTML=''; alert('Free multiple session ended (2 minutes)'); },120000);
-    });
-    $('views-stop').addEventListener('click', ()=> $('views-grid').innerHTML = '');
-  };
-
-  // direct boot
-  window.boot_direct = async function(){
-    const area = $('direct-list'); area.innerHTML = '';
-    const items = [ { url:'https://otieu.com/4/9677163' }, { url:'https://otieu.com/4/9677163' } ];
-    for(const it of items){
-      const card = document.createElement('div'); card.className='card'; card.style.marginBottom='8px';
-      const btn = document.createElement('button'); btn.className='btn'; btn.innerText='Open & Earn 200 coins';
-      btn.addEventListener('click', async ()=>{
-        const w = window.open(it.url,'_blank');
-        btn.disabled = true; btn.innerText = 'Waiting 15s...';
-        let t = 15; const tick = setInterval(async ()=>{
-          t--; if(t<=0){ clearInterval(t); btn.innerText='Done'; try{
-            await db.runTransaction(async tx => {
-              const uRef = db.collection('users').doc(currentUser.uid); const uSnap = await tx.get(uRef);
-              tx.update(uRef, { coins: (uSnap.data().coins||0) + 200 });
-              tx.set(db.collection('transactions').doc(), { type:'credit_direct_fallback', viewer: currentUser.uid, amount:200, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            });
-            await loadUser();
-          }catch(e){ console.warn(e); } btn.style.display='none'; if(w) w.close(); } },1000);
-      });
-      card.innerHTML = `<div class="small">${it.url}</div><div style="margin-top:8px"></div>`;
-      card.querySelector('div').appendChild(btn);
-      area.appendChild(card);
-    }
-  };
-
-  // leaderboard boot
-  window.boot_leaderboard = async function(){
-    const listEl = $('leaderboard-list');
-    const snap = await db.collection('users').get();
-    const users = snap.docs.map(d=>d.data()).sort((a,b)=> (b.coins||0) - (a.coins||0)).slice(0,20);
-    listEl.innerHTML = users.map(u=>`<div style="margin-bottom:6px">${(u.name||u.email)} — ${u.coins||0} coins</div>`).join('');
-  };
-
-  // account boot
-  window.boot_account = async function(){
-    if(!currentUser) return;
-    const uRef = db.collection('users').doc(currentUser.uid);
-    const snap = await uRef.get(); const data = snap.exists? snap.data() : {};
-    $('acct-name').innerText = data.name || currentUser.displayName || '';
-    $('acct-email').innerText = data.email || currentUser.email || '';
-    $('change-name').value = data.name || currentUser.displayName || '';
-    $('save-name').addEventListener('click', async ()=>{
-      const newName = $('change-name').value.trim(); if(!newName) return alert('Enter name');
-      await uRef.update({ name: newName }); await currentUser.updateProfile({ displayName: newName }); alert('Saved'); await loadUser();
-    });
-    $('choose-premium').addEventListener('click', ()=> {
-      const text = encodeURIComponent(`Hello, I want Premium\nName:${data.name||currentUser.displayName}\nEmail:${data.email||currentUser.email}`);
-      window.open('https://wa.me/923330737987?text='+text,'_blank');
-    });
-    $('choose-free').addEventListener('click', async ()=> { await uRef.update({ premium:false }); alert('Set to Free'); await loadUser(); });
-  };
-
-  // show page helper
-  function showPage(name){
-    const root = $('page-root'); root.innerHTML = pages[name]? pages[name]() : '<div class="card">Page not found</div>';
-    const boot = window['boot_'+name]; if(typeof boot === 'function') boot();
+// Load Traffic Ads
+document.getElementById('loadTrafficAds').onclick = () => {
+  const container = document.getElementById('trafficAdsContainer');
+  container.innerHTML = '';
+  for (let i=0; i<3; i++) {
+    const iframe = document.createElement('iframe');
+    iframe.src = 'https://example.com'; // replace with actual ad URL
+    iframe.className='w-full h-48 border rounded';
+    container.appendChild(iframe);
   }
+};
 
-  // initial
-  showPage('dashboard');
-  setInterval(()=>{ if(currentUser) loadUser(); renderActiveAds(); }, 20000);
+// Watch YouTube video
+document.getElementById('loadYoutube').onclick = () => {
+  const container = document.getElementById('youtubeContainer');
+  container.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.src='https://www.youtube.com/embed/Uw9bqrrV-yI?autoplay=1';
+  iframe.width='560';
+  iframe.height='315';
+  iframe.allow='autoplay; encrypted-media';
+  container.appendChild(iframe);
+  // Add coins after 1 min
+  setTimeout(() => {
+    const userRef = db.collection('users').doc(currentUser.uid);
+    userRef.update({ coins: firebase.firestore.FieldValue.increment(100) });
+  }, 60000);
+};
 
-  // small helpers to allow switching between register/login
-  $('btn-to-login').addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
-  $('btn-to-register2').addEventListener('click', ()=> window.scrollTo({top:0,behavior:'smooth'}));
-  </script>
+// Show links
+document.getElementById('showLinks').onclick = () => {
+  const container = document.getElementById('linksContainer');
+  container.innerHTML = '';
+  const links=['https://otieu.com/4/9677163','https://otieu.com/4/9677163'];
+  links.forEach(link => {
+    const a = document.createElement('a');
+    a.href=link;
+    a.target='_blank';
+    a.innerText='Visit Link (200 coins)';
+    a.className='block mb-2 text-blue-600 hover:underline';
+    a.onclick=() => {
+      if(confirm('Clicking this will deduct 200 coins. Continue?')){
+        const userRef= db.collection('users').doc(currentUser.uid);
+        userRef.update({ coins: firebase.firestore.FieldValue.increment(-200) });
+      }
+    };
+    container.appendChild(a);
+  });
+};
+
+</script>
 </body>
 </html>
